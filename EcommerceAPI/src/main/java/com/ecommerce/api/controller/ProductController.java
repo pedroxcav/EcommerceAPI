@@ -16,9 +16,9 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @PostMapping("/new")
-    public ResponseEntity newProduct(@RequestBody @Valid ProductRequest data) {
-        productService.newProduct(data);
+    @PostMapping("/register")
+    public ResponseEntity registerProduct(@RequestBody @Valid ProductRequest data) {
+        productService.register(data);
         return ResponseEntity.ok().build();
     }
 

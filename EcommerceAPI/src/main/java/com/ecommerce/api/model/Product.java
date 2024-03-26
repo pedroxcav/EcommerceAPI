@@ -1,6 +1,5 @@
 package com.ecommerce.api.model;
 
-import com.ecommerce.api.model.dto.ProductRequest;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

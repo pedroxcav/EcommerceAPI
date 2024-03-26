@@ -1,6 +1,5 @@
 package com.ecommerce.api.model;
 
-import com.ecommerce.api.model.dto.Registration;
 import com.ecommerce.api.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
