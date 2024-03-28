@@ -1,6 +1,7 @@
 package com.ecommerce.api.configuration;
 
 import com.ecommerce.api.repository.UserRepository;
+import com.ecommerce.api.service.AuthnService;
 import com.ecommerce.api.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,12 +21,12 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private TokenService tokenService;
+    private AuthnService authnService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var token = recoverToken(request);
         if(token != null) {
-            String username = tokenService.validateToken(token);
+            String username = authnService.validateToken(token);
             UserDetails user = userRepository.findByUsername(username);
 
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());

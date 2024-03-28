@@ -8,7 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,12 +23,15 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         authorization -> authorization
+                                .requestMatchers(HttpMethod.DELETE, "/user/delete/{username}").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/product/delete/{id}").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/product/register").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.POST,"/user/register/admin").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/user/registered").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/user/registered").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/user/register/user").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
                                 .anyRequest().authenticated()

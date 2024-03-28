@@ -1,10 +1,12 @@
 package com.ecommerce.api.model;
 
+import com.ecommerce.api.model.dto.UserDTO;
 import com.ecommerce.api.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +19,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
+@ToString
 @Getter
 @Setter
 public class User implements UserDetails {
@@ -37,9 +40,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @OneToOne
+    @OneToOne(mappedBy = "user")
     private Number number;
-    @OneToMany
+    @OneToMany(mappedBy = "user")
     private Set<Address> address;
     @ManyToMany
     private List<Product> cart;
@@ -55,6 +58,20 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    public User(UserDTO data) {
+        this.name = data.name();
+        this.username = data.username();
+        this.CPF = data.CPF();
+        this.email = data.email();
+        this.password = data.password();
+        this.role = data.role();
+        this.number = data.number();
+        this.address = data.address();
+        this.cart = data.cart();
+        this.wishlist = data.wishlist();
+        this.purchases = data.purchases();
     }
 
     @Override

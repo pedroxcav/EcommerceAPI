@@ -1,7 +1,7 @@
 package com.ecommerce.api.controller;
 
-import com.ecommerce.api.model.Product;
-import com.ecommerce.api.model.dto.ProductRequest;
+import com.ecommerce.api.model.dto.ProductRequestDTO;
+import com.ecommerce.api.model.dto.ProductResponseDTO;
 import com.ecommerce.api.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +17,18 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping("/register")
-    public ResponseEntity registerProduct(@RequestBody @Valid ProductRequest data) {
+    public ResponseEntity registerProduct(@RequestBody @Valid ProductRequestDTO data) {
         productService.register(data);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Registred");
     }
-
     @GetMapping("/registered")
-    public ResponseEntity getRegisteredProducts() {
-        List<Product> registeredProducts = productService.findAll();
-        return ResponseEntity.ok(registeredProducts);
+    public ResponseEntity getAllProducts() {
+        List<ProductResponseDTO> productResponseDTOList = productService.getAllProducts();
+        return ResponseEntity.ok(productResponseDTOList);
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity deleteProduct(@PathVariable(name = "id") Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.ok("Deleted");
     }
 }
