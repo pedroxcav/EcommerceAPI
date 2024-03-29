@@ -1,6 +1,5 @@
 package com.ecommerce.api.model;
 
-import com.ecommerce.api.model.dto.UserDTO;
 import com.ecommerce.api.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -43,13 +43,13 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private Number number;
     @OneToMany(mappedBy = "user")
-    private Set<Address> address;
-    @ManyToMany
-    private List<Product> cart;
-    @ManyToMany
+    private Set<Address> adresses;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private List<Order> cart;
+    @ManyToMany(mappedBy = "users")
     private Set<Product> wishlist;
-    @ManyToMany
-    private List<Product> purchases;
+    @OneToMany(mappedBy = "user")
+    private List<Purchase> purchases;
 
     public User(String name, String username, String CPF, String email, String password, Role role) {
         this.name = name;
@@ -58,20 +58,6 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
-    }
-
-    public User(UserDTO data) {
-        this.name = data.name();
-        this.username = data.username();
-        this.CPF = data.CPF();
-        this.email = data.email();
-        this.password = data.password();
-        this.role = data.role();
-        this.number = data.number();
-        this.address = data.address();
-        this.cart = data.cart();
-        this.wishlist = data.wishlist();
-        this.purchases = data.purchases();
     }
 
     @Override
@@ -99,5 +85,20 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+    public Set<Address> getAdresses() {
+        return adresses.stream()
+                .filter(Address::isActive)
+                .collect(Collectors.toSet());
+    }
+
+    @PreRemove
+    public void preRemove() {
+        for (Address address : this.adresses) {
+            address.setUser(null);
+            address.setActive(false);
+        }
+        this.wishlist = null;
+        this.purchases.forEach(purchase -> purchase.setUser(null));
     }
 }

@@ -1,8 +1,8 @@
 package com.ecommerce.api.controller;
 
-import com.ecommerce.api.model.dto.AthenticationDTO;
-import com.ecommerce.api.model.dto.RegistrationDTO;
-import com.ecommerce.api.model.dto.UserDTO;
+import com.ecommerce.api.model.dto.user.AthenticationDTO;
+import com.ecommerce.api.model.dto.user.RegistrationDTO;
+import com.ecommerce.api.model.dto.user.UserResponseDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.service.UserService;
 import jakarta.validation.Valid;
@@ -18,7 +18,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/register/user")
+    @PostMapping("/register")
     public ResponseEntity registerUser(@RequestBody @Valid RegistrationDTO data) {
         userService.register(data, Role.USER);
         return ResponseEntity.ok("Registred");
@@ -35,7 +35,7 @@ public class UserController {
     }
     @GetMapping("/registered")
     public ResponseEntity getAllUsers() {
-        List<UserDTO> registrationDTOList = userService.getAllUsers();
+        List<UserResponseDTO> registrationDTOList = userService.getAllUsers();
         return ResponseEntity.ok(registrationDTOList);
     }
     @DeleteMapping("/delete/{username}")

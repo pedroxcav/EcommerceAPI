@@ -2,7 +2,6 @@ package com.ecommerce.api.configuration;
 
 import com.ecommerce.api.repository.UserRepository;
 import com.ecommerce.api.service.AuthnService;
-import com.ecommerce.api.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

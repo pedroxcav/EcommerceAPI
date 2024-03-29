@@ -1,4 +1,4 @@
-package com.ecommerce.api.model.dto;
+package com.ecommerce.api.model.dto.address;
 
 public record AddressResponseDTO(Long id,
                                  String zipCode,

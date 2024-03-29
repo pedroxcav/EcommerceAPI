@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "adresses")
 @NoArgsConstructor
@@ -30,9 +32,13 @@ public class Address {
     private String city;
     @Column(nullable = false)
     private String state;
+    @JsonIgnore
     @Column(nullable = false)
     private boolean active;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "address")
+    private Set<Purchase> purchases;
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "user_id")

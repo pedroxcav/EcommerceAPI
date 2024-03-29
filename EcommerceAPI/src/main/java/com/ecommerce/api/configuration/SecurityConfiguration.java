@@ -29,13 +29,12 @@ public class SecurityConfiguration {
                         authorization -> authorization
                                 .requestMatchers(HttpMethod.DELETE, "/user/delete/{username}").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/product/delete/{id}").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/product/register").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/product/new").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.POST,"/user/register/admin").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET,"/user/registered").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/user/register/user").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
-                                .anyRequest().authenticated()
-                )
+                                .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

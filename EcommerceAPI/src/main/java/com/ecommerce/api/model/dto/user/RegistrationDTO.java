@@ -1,4 +1,4 @@
-package com.ecommerce.api.model.dto;
+package com.ecommerce.api.model.dto.user;
 
 public record RegistrationDTO(String name,
                               String username,

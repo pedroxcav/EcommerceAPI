@@ -1,10 +1,9 @@
 package com.ecommerce.api.service;
 
-import com.ecommerce.api.model.Address;
 import com.ecommerce.api.model.User;
-import com.ecommerce.api.model.dto.AthenticationDTO;
-import com.ecommerce.api.model.dto.RegistrationDTO;
-import com.ecommerce.api.model.dto.UserDTO;
+import com.ecommerce.api.model.dto.user.AthenticationDTO;
+import com.ecommerce.api.model.dto.user.RegistrationDTO;
+import com.ecommerce.api.model.dto.user.UserResponseDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,11 +42,11 @@ public class UserService {
         var authentication = authenticationManager.authenticate(usernamePassword);
         return authnService.generateToken((User) authentication.getPrincipal());
     }
-    public List<UserDTO> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers() {
         List<User> userList = userRepository.findAll();
-        return userList
-                .stream()
-                .map(user -> new UserDTO(
+        return userList.stream()
+                .map(user -> new UserResponseDTO(
+                        user.getId(),
                         user.getName(),
                         user.getUsername(),
                         user.getCPF(),
@@ -55,19 +54,16 @@ public class UserService {
                         user.getPassword(),
                         user.getRole(),
                         user.getNumber(),
-                        user.getAddress()
-                                .stream()
-                                .filter(Address::isActive)
-                                .collect(Collectors.toSet()),
+                        user.getAdresses(),
                         user.getCart(),
                         user.getWishlist(),
                         user.getPurchases()))
                 .collect(Collectors.toList());
     }
-    public String getAuthnUsername() {
+    public User getAuthnUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principal = (UserDetails) authentication.getPrincipal();
-        return principal.getUsername();
+        return (User) userRepository.findByUsername(principal.getUsername());
     }
     public void deleteUser(String username) {
         User user = (User) userRepository.findByUsername(username);

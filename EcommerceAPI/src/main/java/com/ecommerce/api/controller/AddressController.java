@@ -1,14 +1,14 @@
 package com.ecommerce.api.controller;
 
-import com.ecommerce.api.model.dto.AddressRequestDTO;
-import com.ecommerce.api.model.dto.AddressResponseDTO;
+import com.ecommerce.api.model.dto.address.AddressRequestDTO;
+import com.ecommerce.api.model.dto.address.AddressResponseDTO;
 import com.ecommerce.api.service.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/address")
@@ -23,7 +23,7 @@ public class AddressController {
     }
     @GetMapping("/registered")
     public ResponseEntity getUserAdresses() {
-        List<AddressResponseDTO> addressResponseDTOList = addressService.getUserAdresses();
+       Set<AddressResponseDTO> addressResponseDTOList = addressService.getUserAdresses();
         return ResponseEntity.ok(addressResponseDTOList);
     }
     @DeleteMapping("/delete/{id}")
