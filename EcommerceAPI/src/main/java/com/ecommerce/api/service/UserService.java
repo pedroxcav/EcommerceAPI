@@ -60,10 +60,24 @@ public class UserService {
                         user.getPurchases()))
                 .collect(Collectors.toList());
     }
-    public User getAuthnUser() {
+    public UserResponseDTO getAuthUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principal = (UserDetails) authentication.getPrincipal();
-        return (User) userRepository.findByUsername(principal.getUsername());
+        var user = (User) userRepository.findByUsername(principal.getUsername());
+        return new UserResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getUsername(),
+                user.getCPF(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getRole(),
+                user.getNumber(),
+                user.getAdresses(),
+                user.getCart(),
+                user.getWishlist(),
+                user.getPurchases()
+        );
     }
     public void deleteUser(String username) {
         User user = (User) userRepository.findByUsername(username);

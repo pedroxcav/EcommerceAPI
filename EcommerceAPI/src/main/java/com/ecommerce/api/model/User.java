@@ -1,5 +1,6 @@
 package com.ecommerce.api.model;
 
+import com.ecommerce.api.model.dto.user.UserResponseDTO;
 import com.ecommerce.api.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -58,6 +59,20 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+    public User(UserResponseDTO data) {
+        this.id = data.id();
+        this.name = data.name();
+        this.username = data.username();
+        this.CPF = data.CPF();
+        this.email = data.email();
+        this.password = data.password();
+        this.role = data.role();
+        this.number = data.number();
+        this.adresses = data.adresses();
+        this.cart = data.cart();
+        this.wishlist = data.wishlist();
+        this.purchases = data.purchases();
     }
 
     @Override

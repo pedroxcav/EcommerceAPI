@@ -16,7 +16,7 @@ public record UserResponseDTO(UUID id,
                               String password,
                               Role role,
                               Number number,
-                              Set<Address> address,
+                              Set<Address> adresses,
                               List<Order> cart,
                               Set<Product> wishlist,
                               List<Purchase> purchases) {

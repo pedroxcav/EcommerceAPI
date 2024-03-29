@@ -50,7 +50,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
     public void favorite(Long id) {
-        var user = (User) userService.getAuthnUser();
+        var user = new User(userService.getAuthUser());
         Optional<Product> optionalProduct = productRepository.findById(id);
         if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
             var product = optionalProduct.get();
@@ -66,7 +66,7 @@ public class ProductService {
             throw new RuntimeException("The product doesn't exist!");
     }
     public void unfavorite(Long id) {
-        var user = (User) userService.getAuthnUser();
+        var user = new User(userService.getAuthUser());
         Optional<Product> optionalProduct = productRepository.findById(id);
         if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
             var product = optionalProduct.get();
@@ -82,7 +82,7 @@ public class ProductService {
             throw new RuntimeException("The product doesn't exist!");
     }
     public Set<ProductResponseDTO> getUserWishlist() {
-        var user = (User) userService.getAuthnUser();
+        var user = new User(userService.getAuthUser());
         return user.getWishlist().stream()
                 .map(product -> new ProductResponseDTO(
                         product.getId(),

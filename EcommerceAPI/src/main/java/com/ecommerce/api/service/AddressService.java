@@ -5,7 +5,6 @@ import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.address.AddressRequestDTO;
 import com.ecommerce.api.model.dto.address.AddressResponseDTO;
 import com.ecommerce.api.repository.AddressRepository;
-import com.ecommerce.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +18,22 @@ public class AddressService {
     private AddressRepository addressRepository;
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
 
     public void newAdress(AddressRequestDTO addressData) {
-        var user = (User) userService.getAuthnUser();
+        var user = new User(userService.getAuthUser());
         Address address = new Address(
-                addressData.zipCode(), addressData.number(), addressData.street(), addressData.neighborhood(), addressData.city(), addressData.state(), user);
+                addressData.zipCode(),
+                addressData.number(),
+                addressData.street(),
+                addressData.neighborhood(),
+                addressData.city(),
+                addressData.state(),
+                user);
+        user.getAdresses().add(address);
         addressRepository.save(address);
     }
     public Set<AddressResponseDTO> getUserAdresses() {
-        var user = (User) userService.getAuthnUser();
+        var user = new User(userService.getAuthUser());
         return user.getAdresses().stream()
                 .map(address -> new AddressResponseDTO(
                         address.getId(),
