@@ -81,8 +81,16 @@ public class UserService {
     }
     public void deleteUser(String username) {
         User user = (User) userRepository.findByUsername(username);
-        if(user == null)
+        if(user != null) {
+            user.getWishlist().forEach(product -> product.getUsers().remove(user));
+            user.getPurchases().forEach(purchase -> purchase.setUser(null));
+            user.getAdresses().forEach(address -> {
+                address.setUser(null);
+                address.setActive(false);
+            });
+            userRepository.delete(user);
+        } else {
             throw new RuntimeException("User doesn't exist in database!!");
-        userRepository.delete(user);
+        }
     }
 }

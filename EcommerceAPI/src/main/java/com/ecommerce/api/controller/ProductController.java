@@ -37,7 +37,7 @@ public class ProductController {
         productService.favorite(id);
         return ResponseEntity.ok("Favorited");
     }
-    @PostMapping("/unfavorite/{id}")
+    @DeleteMapping("/unfavorite/{id}")
     public ResponseEntity unfavorite(@PathVariable @Valid Long id) {
         productService.unfavorite(id);
         return ResponseEntity.ok("Unfavorited");

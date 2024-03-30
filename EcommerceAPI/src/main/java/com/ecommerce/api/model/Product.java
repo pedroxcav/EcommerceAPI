@@ -2,17 +2,13 @@ package com.ecommerce.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "products")
 @NoArgsConstructor
-@ToString
 @Getter
 @Setter
 public class Product {

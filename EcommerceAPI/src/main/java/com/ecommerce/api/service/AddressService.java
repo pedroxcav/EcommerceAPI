@@ -46,12 +46,17 @@ public class AddressService {
                 )).collect(Collectors.toSet());
     }
     public void deleteAddress(Long id) {
+        var user = new User(userService.getAuthUser());
         Optional<Address> optionalAddress = addressRepository.findById(id);
         if(optionalAddress.isPresent() && optionalAddress.get().isActive()) {
             Address address = optionalAddress.get();
-            address.setActive(false);
-            addressRepository.save(address);
+            Set<Address> adresses = user.getAdresses();
+            if(adresses.contains(optionalAddress.get())) {
+                address.setActive(false);
+                addressRepository.save(address);
+            } else
+                throw new RuntimeException("The address doesn't exist in your list!");
         } else
-            throw new RuntimeException("Address doesn't exist in your list!");
+            throw new RuntimeException("The address doesn't exist!");
     }
 }

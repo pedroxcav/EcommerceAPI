@@ -3,10 +3,7 @@ package com.ecommerce.api.model;
 import com.ecommerce.api.model.dto.user.UserResponseDTO;
 import com.ecommerce.api.model.enums.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +17,6 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
-@ToString
 @Getter
 @Setter
 public class User implements UserDetails {
@@ -41,7 +37,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Number number;
     @OneToMany(mappedBy = "user")
     private Set<Address> adresses;
@@ -105,15 +101,5 @@ public class User implements UserDetails {
         return adresses.stream()
                 .filter(Address::isActive)
                 .collect(Collectors.toSet());
-    }
-
-    @PreRemove
-    public void preRemove() {
-        for (Address address : this.adresses) {
-            address.setUser(null);
-            address.setActive(false);
-        }
-        this.wishlist = null;
-        this.purchases.forEach(purchase -> purchase.setUser(null));
     }
 }

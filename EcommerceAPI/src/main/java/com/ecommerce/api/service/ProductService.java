@@ -4,6 +4,7 @@ import com.ecommerce.api.model.Product;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.product.ProductRequestDTO;
 import com.ecommerce.api.model.dto.product.ProductResponseDTO;
+import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.ProductRepository;
 import com.ecommerce.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ public class ProductService {
     private UserRepository userRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private OrderRepository orderRepository;
 
     public void newProduct(ProductRequestDTO data) {
         var product = new Product(data.name(), data.description(), data.price());
@@ -31,6 +34,7 @@ public class ProductService {
         Optional<Product> optionalProduct = productRepository.findById(id);
         if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
             Product product = optionalProduct.get();
+            orderRepository.deleteByProduct(product);
             product.setUsers(null);
             product.setActive(false);
             productRepository.save(product);

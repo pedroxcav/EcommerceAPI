@@ -1,15 +1,14 @@
 package com.ecommerce.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Entity
 @Table(name = "orders")
 @NoArgsConstructor
-@ToString
 @Getter
 @Setter
 public class Order {
@@ -19,14 +18,21 @@ public class Order {
 
     @Column(nullable = false)
     private Integer amount;
+    @Column(nullable = false)
+    private Double price;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private Double price = product==null ? null : this.product.getPrice()*amount;
+    public Order(Integer amount, Double price, Product product, User user) {
+        this.amount = amount;
+        this.price = price;
+        this.product = product;
+        this.user = user;
+    }
 }

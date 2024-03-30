@@ -46,6 +46,6 @@ public class AuthnService implements UserDetailsService {
     }
 
     private Instant generateExpiration() {
-        return LocalDateTime.now().plusHours(1L).toInstant(ZoneOffset.of("-03:00"));
+        return LocalDateTime.now().plusHours(24L).toInstant(ZoneOffset.of("-03:00"));
     }
 }
