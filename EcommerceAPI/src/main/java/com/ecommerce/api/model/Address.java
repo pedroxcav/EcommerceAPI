@@ -34,8 +34,8 @@ public class Address {
     @Column(nullable = false)
     private boolean active;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "address")
+    @JsonIgnore
     private Set<Purchase> purchases;
     @ManyToOne
     @JsonIgnore

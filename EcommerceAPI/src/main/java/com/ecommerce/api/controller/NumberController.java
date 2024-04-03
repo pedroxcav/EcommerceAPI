@@ -1,7 +1,6 @@
 package com.ecommerce.api.controller;
 
-import com.ecommerce.api.model.dto.number.NumberRequestDTO;
-import com.ecommerce.api.model.dto.number.NumberResponseDTO;
+import com.ecommerce.api.model.dto.number.NumberDTO;
 import com.ecommerce.api.service.NumberService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ public class NumberController {
     private NumberService numberService;
 
     @PostMapping("/new")
-    public ResponseEntity newNumber(@RequestBody @Valid NumberRequestDTO data) {
+    public ResponseEntity newNumber(@RequestBody @Valid NumberDTO data) {
         numberService.newNumber(data);
         return ResponseEntity.ok("Saved");
     }
@@ -25,13 +24,13 @@ public class NumberController {
         return ResponseEntity.ok("Deleted");
     }
     @PutMapping("/update")
-    public ResponseEntity updateNumber(@RequestBody @Valid NumberRequestDTO data) {
+    public ResponseEntity updateNumber(@RequestBody @Valid NumberDTO data) {
         numberService.updateNumber(data);
         return ResponseEntity.ok("Updated");
     }
     @GetMapping("/registered")
     public ResponseEntity getUserNumber() {
-        NumberResponseDTO numberResponseDTO = numberService.getUserNumber();
-        return ResponseEntity.ok(numberResponseDTO);
+        NumberDTO numberDTO = numberService.getUserNumber();
+        return ResponseEntity.ok(numberDTO);
     }
 }

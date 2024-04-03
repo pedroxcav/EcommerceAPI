@@ -5,8 +5,9 @@ import com.ecommerce.api.model.dto.user.AthenticationDTO;
 import com.ecommerce.api.model.dto.user.RegistrationDTO;
 import com.ecommerce.api.model.dto.user.UserResponseDTO;
 import com.ecommerce.api.model.enums.Role;
+import com.ecommerce.api.repository.AddressRepository;
+import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,14 +21,21 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    @Autowired
-    private AuthnService authnService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthnService authnService;
+    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AddressRepository addressRepository;
+    private final AuthenticationManager authenticationManager;
+
+    public UserService(AuthnService authnService, UserRepository userRepository, OrderRepository orderRepository, PasswordEncoder passwordEncoder, AddressRepository addressRepository, AuthenticationManager authenticationManager) {
+        this.authnService = authnService;
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.addressRepository = addressRepository;
+        this.authenticationManager = authenticationManager;
+    }
 
     public void register(RegistrationDTO data, Role role) {
         if(userRepository.findByUsername(data.username()) != null)
@@ -54,8 +62,8 @@ public class UserService {
                         user.getPassword(),
                         user.getRole(),
                         user.getNumber(),
-                        user.getAdresses(),
-                        user.getCart(),
+                        user.getFilteredAdresses(),
+                        user.getFilteredCart(),
                         user.getWishlist(),
                         user.getPurchases()))
                 .collect(Collectors.toList());
@@ -63,7 +71,7 @@ public class UserService {
     public UserResponseDTO getAuthUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principal = (UserDetails) authentication.getPrincipal();
-        var user = (User) userRepository.findByUsername(principal.getUsername());
+        User user = (User) userRepository.findByUsername(principal.getUsername());
         return new UserResponseDTO(
                 user.getId(),
                 user.getName(),
@@ -84,13 +92,19 @@ public class UserService {
         if(user != null) {
             user.getWishlist().forEach(product -> product.getUsers().remove(user));
             user.getPurchases().forEach(purchase -> purchase.setUser(null));
+            user.getCart().forEach(order -> {
+                order.setUser(null);
+                if(!order.isCompleted())
+                    orderRepository.delete(order);
+            });
             user.getAdresses().forEach(address -> {
                 address.setUser(null);
                 address.setActive(false);
+                if (address.getPurchases().isEmpty())
+                    addressRepository.delete(address);
             });
             userRepository.delete(user);
-        } else {
+        } else
             throw new RuntimeException("User doesn't exist in database!!");
-        }
     }
 }

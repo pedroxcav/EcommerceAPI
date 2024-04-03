@@ -7,7 +7,6 @@ import com.ecommerce.api.model.dto.order.OrderRequestDTO;
 import com.ecommerce.api.model.dto.order.OrderResponseDTO;
 import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,31 +15,41 @@ import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private UserService userService;
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final UserService userService;
+
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserService userService) {
+        this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+        this.userService = userService;
+    }
 
     public void addToCart(OrderRequestDTO data) {
+        if(data.amount() < 1) throw new RuntimeException("Invalid amount");
         var user = new User(userService.getAuthUser());
         Optional<Product> optionalProduct = productRepository.findById(data.productId());
         if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
-            var product = optionalProduct.get();
-            orderRepository.save(new Order(
-                    data.amount(),
-                    product.getPrice() * data.amount(),
-                    product,
-                    user
-            ));
+            Product product = optionalProduct.get();
+            Optional<Order> optionalOrder = Optional.empty();
+            for (Order order : product.getOrders())
+                if(order.isCompleted() && user.getFilteredCart().contains(order))
+                    optionalOrder = Optional.of(order);
+            optionalOrder.ifPresentOrElse(
+                    order -> {
+                        int amount = order.getAmount() + data.amount();
+                        order.setAmount(amount);
+                        order.setPrice(amount * order.getProduct().getPrice());
+                        orderRepository.save(order);
+                    }, () -> orderRepository.save(
+                            new Order(product, data.amount(), product.getPrice() * data.amount(), user)));
         } else
             throw new RuntimeException("The product doesn't exist!");
     }
     public void deleteFromCart(Long id) {
         var user = new User(userService.getAuthUser());
         Optional<Order> optionalOrder = orderRepository.findById(id);
-        if(optionalOrder.isPresent() && user.getCart().contains(optionalOrder.get())) {
+        if(optionalOrder.isPresent() && !optionalOrder.get().isCompleted() && user.getFilteredCart().contains(optionalOrder.get())) {
             var order = optionalOrder.get();
             orderRepository.delete(order);
         } else
@@ -48,12 +57,12 @@ public class OrderService {
     }
     public Set<OrderResponseDTO> getUserCart() {
         var user = new User(userService.getAuthUser());
-        return user.getCart().stream()
+        return user.getFilteredCart().stream()
                 .map(order -> new OrderResponseDTO(
                         order.getId(),
-                        order.getProduct(),
                         order.getAmount(),
-                        order.getPrice()
+                        order.getPrice(),
+                        order.getProduct()
                 )).collect(Collectors.toSet());
     }
 }

@@ -1,13 +1,12 @@
 package com.ecommerce.api.service;
 
+import com.ecommerce.api.model.Order;
 import com.ecommerce.api.model.Product;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.product.ProductRequestDTO;
 import com.ecommerce.api.model.dto.product.ProductResponseDTO;
 import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.ProductRepository;
-import com.ecommerce.api.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,14 +16,15 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final UserService userService;
+
+    public ProductService(ProductRepository productRepository, OrderRepository orderRepository, UserService userService) {
+        this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
+        this.userService = userService;
+    }
 
     public void newProduct(ProductRequestDTO data) {
         var product = new Product(data.name(), data.description(), data.price());
@@ -34,10 +34,20 @@ public class ProductService {
         Optional<Product> optionalProduct = productRepository.findById(id);
         if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
             Product product = optionalProduct.get();
-            orderRepository.deleteByProduct(product);
-            product.setUsers(null);
-            product.setActive(false);
-            productRepository.save(product);
+            if(product.getOrders().stream().anyMatch(Order::isCompleted)) {
+                product.getOrders().stream()
+                        .filter(order -> !order.isCompleted())
+                        .forEach(order -> {
+                            orderRepository.delete(order);
+                            product.getOrders().remove(order);
+                        });
+                product.setActive(false);
+                product.setUsers(null);
+                productRepository.save(product);
+            } else {
+                orderRepository.deleteAll(product.getOrders());
+                productRepository.delete(product);
+            }
         } else
             throw new RuntimeException("The product doesn't exists!");
     }
@@ -63,7 +73,7 @@ public class ProductService {
             if(!wishlist.contains(product)) {
                 wishlist.add(product);
                 userList.add(user);
-                userRepository.save(user);
+                productRepository.save(product);
             } else
                 throw new RuntimeException("The product was already favorited!");
         } else
@@ -79,7 +89,7 @@ public class ProductService {
             if(wishlist.contains(product)) {
                 wishlist.remove(product);
                 userList.remove(user);
-                userRepository.save(user);
+                productRepository.save(product);
             } else
                 throw new RuntimeException("The product hasn't been favorited yet!");
         } else

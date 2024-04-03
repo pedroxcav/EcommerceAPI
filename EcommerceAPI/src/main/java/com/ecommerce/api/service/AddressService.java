@@ -29,12 +29,13 @@ public class AddressService {
                 addressData.city(),
                 addressData.state(),
                 user);
-        user.getAdresses().add(address);
+        user.getFilteredAdresses().add(address);
         addressRepository.save(address);
     }
     public Set<AddressResponseDTO> getUserAdresses() {
+        //var user = (User) userRepository.findByUsername(userService.getAuthUser());
         var user = new User(userService.getAuthUser());
-        return user.getAdresses().stream()
+        return user.getFilteredAdresses().stream()
                 .map(address -> new AddressResponseDTO(
                         address.getId(),
                         address.getZipCode(),
@@ -50,10 +51,13 @@ public class AddressService {
         Optional<Address> optionalAddress = addressRepository.findById(id);
         if(optionalAddress.isPresent() && optionalAddress.get().isActive()) {
             Address address = optionalAddress.get();
-            Set<Address> adresses = user.getAdresses();
+            Set<Address> adresses = user.getFilteredAdresses();
             if(adresses.contains(optionalAddress.get())) {
-                address.setActive(false);
-                addressRepository.save(address);
+                if(!address.getPurchases().isEmpty()) {
+                    address.setActive(false);
+                    addressRepository.save(address);
+                } else
+                    addressRepository.delete(address);
             } else
                 throw new RuntimeException("The address doesn't exist in your list!");
         } else

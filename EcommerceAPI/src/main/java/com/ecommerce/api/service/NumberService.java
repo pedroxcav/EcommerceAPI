@@ -2,8 +2,7 @@ package com.ecommerce.api.service;
 
 import com.ecommerce.api.model.Number;
 import com.ecommerce.api.model.User;
-import com.ecommerce.api.model.dto.number.NumberRequestDTO;
-import com.ecommerce.api.model.dto.number.NumberResponseDTO;
+import com.ecommerce.api.model.dto.number.NumberDTO;
 import com.ecommerce.api.repository.NumberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,8 +14,10 @@ public class NumberService {
     @Autowired
     private UserService userService;
 
-    public void newNumber(NumberRequestDTO data) {
+    public void newNumber(NumberDTO data) {
         var user = new User(userService.getAuthUser());
+        if(user.getNumber() != null)
+            throw new RuntimeException("There's a number registered already!");
         var number = new Number(
                 data.areaCode(),
                 data.number(),
@@ -31,7 +32,7 @@ public class NumberService {
         else
             throw new RuntimeException("You don't have a number yet!");
     }
-    public void updateNumber(NumberRequestDTO data) {
+    public void updateNumber(NumberDTO data) {
         var user = new User(userService.getAuthUser());
         var number = user.getNumber();
         if(number != null) {
@@ -41,12 +42,11 @@ public class NumberService {
         } else
             throw new RuntimeException("You don't have a number yet!");
     }
-    public NumberResponseDTO getUserNumber() {
+    public NumberDTO getUserNumber() {
         var user = new User(userService.getAuthUser());
         var number = user.getNumber();
         if(number != null) {
-            return new NumberResponseDTO(
-                    number.getId(),
+            return new NumberDTO(
                     number.getAreaCode(),
                     number.getNumber()
             );

@@ -41,7 +41,7 @@ public class User implements UserDetails {
     private Number number;
     @OneToMany(mappedBy = "user")
     private Set<Address> adresses;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "user")
     private List<Order> cart;
     @ManyToMany(mappedBy = "users")
     private Set<Product> wishlist;
@@ -97,9 +97,14 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-    public Set<Address> getAdresses() {
+    public Set<Address> getFilteredAdresses() {
         return adresses.stream()
                 .filter(Address::isActive)
                 .collect(Collectors.toSet());
+    }
+    public List<Order> getFilteredCart() {
+        return cart.stream()
+                .filter(order -> !order.isCompleted())
+                .collect(Collectors.toList());
     }
 }

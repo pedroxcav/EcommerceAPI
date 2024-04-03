@@ -30,9 +30,6 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private Set<Order> orders;
     @JsonIgnore
-    @OneToMany(mappedBy = "product")
-    private Set<Purchase> purchases;
-    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "wishlist",
