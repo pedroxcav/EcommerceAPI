@@ -1,5 +1,8 @@
 package com.ecommerce.api.service;
 
+import com.ecommerce.api.exception.InvalidAmountException;
+import com.ecommerce.api.exception.NullOrderException;
+import com.ecommerce.api.exception.NullProductException;
 import com.ecommerce.api.model.Order;
 import com.ecommerce.api.model.Product;
 import com.ecommerce.api.model.User;
@@ -26,7 +29,7 @@ public class OrderService {
     }
 
     public void addToCart(OrderRequestDTO data) {
-        if(data.amount() < 1) throw new RuntimeException("Invalid amount");
+        if(data.amount() < 1) throw new InvalidAmountException();
         var user = new User(userService.getAuthUser());
         Optional<Product> optionalProduct = productRepository.findById(data.productId());
         if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
@@ -44,7 +47,7 @@ public class OrderService {
                     }, () -> orderRepository.save(
                             new Order(product, data.amount(), product.getPrice() * data.amount(), user)));
         } else
-            throw new RuntimeException("The product doesn't exist!");
+            throw new NullProductException();
     }
     public void deleteFromCart(Long id) {
         var user = new User(userService.getAuthUser());
@@ -53,7 +56,7 @@ public class OrderService {
             var order = optionalOrder.get();
             orderRepository.delete(order);
         } else
-            throw new RuntimeException("The order doesn't exist in your cart");
+            throw new NullOrderException("The order doesn't exist in your cart");
     }
     public Set<OrderResponseDTO> getUserCart() {
         var user = new User(userService.getAuthUser());

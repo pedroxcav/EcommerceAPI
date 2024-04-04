@@ -1,5 +1,7 @@
 package com.ecommerce.api.service;
 
+import com.ecommerce.api.exception.NullAddressException;
+import com.ecommerce.api.exception.NullOrderException;
 import com.ecommerce.api.model.Address;
 import com.ecommerce.api.model.Order;
 import com.ecommerce.api.model.Purchase;
@@ -36,14 +38,14 @@ public class PurchaseService {
 
         Optional<Address> optionalAddress = addressRepository.findById(data.addressId());
         if(optionalAddress.isEmpty() || !user.getFilteredAdresses().contains(optionalAddress.get()))
-            throw new RuntimeException("The address doesn't exist!");
+            throw new NullAddressException();
 
         double totalPrice = 0D;
         Set<Order> orderList = new HashSet<>();
         for (Long id : data.orderIdSet()) {
             Optional<Order> optionalOrder = orderRepository.findById(id);
             if(optionalOrder.isEmpty())
-                throw new RuntimeException("One of the orders doesn't exist!");
+                throw new NullOrderException("One of the orders doesn't exist!");
             else {
                 Order order = optionalOrder.get();
                 totalPrice += order.getPrice();

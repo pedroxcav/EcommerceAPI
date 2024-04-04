@@ -17,18 +17,18 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping("/new")
-    public ResponseEntity addToCart(@RequestBody @Valid OrderRequestDTO data) {
+    public ResponseEntity<String> addToCart(@RequestBody @Valid OrderRequestDTO data) {
         orderService.addToCart(data);
         return ResponseEntity.ok("Added");
     }
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteFromCart(@PathVariable("id") @Valid Long id) {
+    public ResponseEntity<String> deleteFromCart(@PathVariable("id") @Valid Long id) {
         orderService.deleteFromCart(id);
         return ResponseEntity.ok("Deleted");
     }
     @GetMapping("/cart")
-    public ResponseEntity getUserCart() {
-        Set<OrderResponseDTO> orderResponseDTOSet = orderService.getUserCart();
+    public ResponseEntity<Set<OrderResponseDTO>> getUserCart() {
+        var orderResponseDTOSet = orderService.getUserCart();
         return ResponseEntity.ok(orderResponseDTOSet);
     }
 }

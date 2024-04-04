@@ -2,6 +2,8 @@ package com.ecommerce.api.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,24 +30,32 @@ public class AuthnService implements UserDetailsService {
     }
 
     public String generateToken(User user) {
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-        return JWT.create()
-                .withIssuer("EcommerceAPI")
-                .withSubject(user.getUsername())
-                .withExpiresAt(generateExpiration())
-                .sign(algorithm);
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.create()
+                    .withIssuer("EcommerceAPI")
+                    .withSubject(user.getUsername())
+                    .withExpiresAt(generateExpiration())
+                    .sign(algorithm);
+        } catch (JWTCreationException exception) {
+            throw new RuntimeException("Error while generating token!", exception);
+        }
     }
 
     public String validateToken(String token) {
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-        return JWT.require(algorithm)
-                .withIssuer("EcommerceAPI")
-                .build()
-                .verify(token)
-                .getSubject();
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.require(algorithm)
+                    .withIssuer("EcommerceAPI")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+        } catch (JWTVerificationException exception) {
+            return "";
+        }
     }
 
     private Instant generateExpiration() {
-        return LocalDateTime.now().plusHours(24L).toInstant(ZoneOffset.of("-03:00"));
+        return LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.of("-03:00"));
     }
 }

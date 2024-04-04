@@ -1,5 +1,7 @@
 package com.ecommerce.api.service;
 
+import com.ecommerce.api.exception.NullNumberException;
+import com.ecommerce.api.exception.NumberRegisteredException;
 import com.ecommerce.api.model.Number;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.number.NumberDTO;
@@ -17,7 +19,7 @@ public class NumberService {
     public void newNumber(NumberDTO data) {
         var user = new User(userService.getAuthUser());
         if(user.getNumber() != null)
-            throw new RuntimeException("There's a number registered already!");
+            throw new NumberRegisteredException();
         var number = new Number(
                 data.areaCode(),
                 data.number(),
@@ -30,7 +32,7 @@ public class NumberService {
         if(number != null)
             numberRepository.delete(number);
         else
-            throw new RuntimeException("You don't have a number yet!");
+            throw new NullNumberException();
     }
     public void updateNumber(NumberDTO data) {
         var user = new User(userService.getAuthUser());
@@ -40,7 +42,7 @@ public class NumberService {
             number.setNumber(data.number());
             numberRepository.save(number);
         } else
-            throw new RuntimeException("You don't have a number yet!");
+            throw new NullNumberException();
     }
     public NumberDTO getUserNumber() {
         var user = new User(userService.getAuthUser());
@@ -51,6 +53,6 @@ public class NumberService {
                     number.getNumber()
             );
         } else
-            throw new RuntimeException("You don't have a number yet!");
+            throw new NullNumberException();
     }
 }

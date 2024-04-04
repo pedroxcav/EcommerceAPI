@@ -1,5 +1,8 @@
 package com.ecommerce.api.service;
 
+import com.ecommerce.api.exception.InvalidCPFException;
+import com.ecommerce.api.exception.NullUserException;
+import com.ecommerce.api.exception.UserRegisteredException;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.user.AthenticationDTO;
 import com.ecommerce.api.model.dto.user.RegistrationDTO;
@@ -8,6 +11,7 @@ import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.AddressRepository;
 import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.UserRepository;
+import com.ecommerce.api.service.component.Validator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+    private final Validator validator;
     private final AuthnService authnService;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
@@ -28,18 +33,21 @@ public class UserService {
     private final AddressRepository addressRepository;
     private final AuthenticationManager authenticationManager;
 
-    public UserService(AuthnService authnService, UserRepository userRepository, OrderRepository orderRepository, PasswordEncoder passwordEncoder, AddressRepository addressRepository, AuthenticationManager authenticationManager) {
+    public UserService(AuthnService authnService, UserRepository userRepository, OrderRepository orderRepository, PasswordEncoder passwordEncoder, AddressRepository addressRepository, AuthenticationManager authenticationManager, Validator validator) {
         this.authnService = authnService;
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.passwordEncoder = passwordEncoder;
         this.addressRepository = addressRepository;
         this.authenticationManager = authenticationManager;
+        this.validator = validator;
     }
 
     public void register(RegistrationDTO data, Role role) {
-        if(userRepository.findByUsername(data.username()) != null)
-            throw new RuntimeException("User already exists in database!!");
+        if (!validator.validate(data.CPF()))
+            throw new InvalidCPFException();
+        else if(userRepository.existsByUsernameOrCPF(data.username(), data.CPF()))
+            throw new UserRegisteredException();
         var encoded = passwordEncoder.encode(data.password());
         userRepository.save(
                 new User(data.name(), data.username(), data.CPF(), data.email(), encoded, role)
@@ -105,6 +113,6 @@ public class UserService {
             });
             userRepository.delete(user);
         } else
-            throw new RuntimeException("User doesn't exist in database!!");
+            throw new NullUserException();
     }
 }

@@ -19,27 +19,27 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity registerUser(@RequestBody @Valid RegistrationDTO data) {
+    public ResponseEntity<String> registerUser(@RequestBody @Valid RegistrationDTO data) {
         userService.register(data, Role.USER);
         return ResponseEntity.ok("Registred");
     }
     @PostMapping("/register/admin")
-    public ResponseEntity registerAdmin(@RequestBody @Valid RegistrationDTO data) {
+    public ResponseEntity<String> registerAdmin(@RequestBody @Valid RegistrationDTO data) {
         userService.register(data, Role.ADMIN);
         return ResponseEntity.ok("Registred");
     }
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Valid AthenticationDTO data) {
+    public ResponseEntity<String> login(@RequestBody @Valid AthenticationDTO data) {
         String token = userService.login(data);
         return ResponseEntity.ok(token);
     }
     @GetMapping("/registered")
-    public ResponseEntity getAllUsers() {
-        List<UserResponseDTO> registrationDTOList = userService.getAllUsers();
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        var registrationDTOList = userService.getAllUsers();
         return ResponseEntity.ok(registrationDTOList);
     }
     @DeleteMapping("/delete/{username}")
-    public ResponseEntity deleteUser(@PathVariable(name = "username") String username) {
+    public ResponseEntity<String> deleteUser(@PathVariable(name = "username") String username) {
         userService.deleteUser(username);
         return ResponseEntity.ok("Deleted");
     }

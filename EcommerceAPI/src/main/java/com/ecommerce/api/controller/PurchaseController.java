@@ -17,18 +17,18 @@ public class PurchaseController {
     private PurchaseService purchaseService;
 
     @PostMapping("/new")
-    public ResponseEntity buyOrders(@RequestBody @Valid PurchaseRequestDTO data) {
+    public ResponseEntity<String> buyOrders(@RequestBody @Valid PurchaseRequestDTO data) {
         purchaseService.buyOrders(data);
         return ResponseEntity.ok("Bought");
     }
     @GetMapping("/user")
-    public ResponseEntity getUserPurchases() {
-        Set<PurchaseResponseDTO> userPurchases = purchaseService.getUserPurchases();
+    public ResponseEntity<Set<PurchaseResponseDTO>> getUserPurchases() {
+        var userPurchases = purchaseService.getUserPurchases();
         return ResponseEntity.ok(userPurchases);
     }
     @GetMapping("/registered")
-    public ResponseEntity getAllPurchases() {
-        Set<PurchaseResponseDTO> purchaseSet = purchaseService.getAllPurchases();
+    public ResponseEntity<Set<PurchaseResponseDTO>> getAllPurchases() {
+        var purchaseSet = purchaseService.getAllPurchases();
         return ResponseEntity.ok(purchaseSet);
     }
 }

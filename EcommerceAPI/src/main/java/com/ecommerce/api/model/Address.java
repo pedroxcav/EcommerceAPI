@@ -18,7 +18,7 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 8)
     private String zipCode;
     @Column(nullable = false)
     private String number;

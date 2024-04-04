@@ -14,23 +14,23 @@ public class NumberController {
     private NumberService numberService;
 
     @PostMapping("/new")
-    public ResponseEntity newNumber(@RequestBody @Valid NumberDTO data) {
+    public ResponseEntity<String> newNumber(@RequestBody @Valid NumberDTO data) {
         numberService.newNumber(data);
         return ResponseEntity.ok("Saved");
     }
     @DeleteMapping("/delete")
-    public ResponseEntity deleteNumber() {
+    public ResponseEntity<String> deleteNumber() {
         numberService.deleteNumber();
         return ResponseEntity.ok("Deleted");
     }
     @PutMapping("/update")
-    public ResponseEntity updateNumber(@RequestBody @Valid NumberDTO data) {
+    public ResponseEntity<String> updateNumber(@RequestBody @Valid NumberDTO data) {
         numberService.updateNumber(data);
         return ResponseEntity.ok("Updated");
     }
     @GetMapping("/registered")
-    public ResponseEntity getUserNumber() {
-        NumberDTO numberDTO = numberService.getUserNumber();
+    public ResponseEntity<NumberDTO> getUserNumber() {
+        var numberDTO = numberService.getUserNumber();
         return ResponseEntity.ok(numberDTO);
     }
 }

@@ -1,5 +1,7 @@
 package com.ecommerce.api.service;
 
+import com.ecommerce.api.exception.NullProductException;
+import com.ecommerce.api.exception.WishlistProductException;
 import com.ecommerce.api.model.Order;
 import com.ecommerce.api.model.Product;
 import com.ecommerce.api.model.User;
@@ -49,7 +51,7 @@ public class ProductService {
                 productRepository.delete(product);
             }
         } else
-            throw new RuntimeException("The product doesn't exists!");
+            throw new NullProductException();
     }
     public List<ProductResponseDTO> getAllProducts() {
         List<Product> productList = productRepository.findAll();
@@ -75,9 +77,9 @@ public class ProductService {
                 userList.add(user);
                 productRepository.save(product);
             } else
-                throw new RuntimeException("The product was already favorited!");
+                throw new WishlistProductException("The product was already favorited!");
         } else
-            throw new RuntimeException("The product doesn't exist!");
+            throw new NullProductException();
     }
     public void unfavorite(Long id) {
         var user = new User(userService.getAuthUser());
@@ -91,9 +93,9 @@ public class ProductService {
                 userList.remove(user);
                 productRepository.save(product);
             } else
-                throw new RuntimeException("The product hasn't been favorited yet!");
+                throw new WishlistProductException("The product hasn't been favorited yet!");
         } else
-            throw new RuntimeException("The product doesn't exist!");
+            throw new NullProductException();
     }
     public Set<ProductResponseDTO> getUserWishlist() {
         var user = new User(userService.getAuthUser());

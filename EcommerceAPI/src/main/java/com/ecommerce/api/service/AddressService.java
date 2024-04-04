@@ -1,5 +1,6 @@
 package com.ecommerce.api.service;
 
+import com.ecommerce.api.exception.NullAddressException;
 import com.ecommerce.api.model.Address;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.address.AddressRequestDTO;
@@ -33,7 +34,6 @@ public class AddressService {
         addressRepository.save(address);
     }
     public Set<AddressResponseDTO> getUserAdresses() {
-        //var user = (User) userRepository.findByUsername(userService.getAuthUser());
         var user = new User(userService.getAuthUser());
         return user.getFilteredAdresses().stream()
                 .map(address -> new AddressResponseDTO(
@@ -59,8 +59,8 @@ public class AddressService {
                 } else
                     addressRepository.delete(address);
             } else
-                throw new RuntimeException("The address doesn't exist in your list!");
+                throw new NullAddressException("The address doesn't exist in your list!");
         } else
-            throw new RuntimeException("The address doesn't exist!");
+            throw new NullAddressException();
     }
 }
