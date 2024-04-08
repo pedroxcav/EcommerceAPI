@@ -58,6 +58,11 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <!--<dependency>
             To make sure it will work, search for (http://localhost:8080/swagger-ui/index.html)
             <groupId>org.springdoc</groupId>

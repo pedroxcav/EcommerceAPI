@@ -1,6 +1,6 @@
 package com.ecommerce.api.controller;
 
-import com.ecommerce.api.model.dto.user.AthenticationDTO;
+import com.ecommerce.api.model.dto.user.AuthenticationDTO;
 import com.ecommerce.api.model.dto.user.RegistrationDTO;
 import com.ecommerce.api.model.dto.user.UserResponseDTO;
 import com.ecommerce.api.model.enums.Role;
@@ -29,7 +29,7 @@ public class UserController {
         return ResponseEntity.ok("Registred");
     }
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid AthenticationDTO data) {
+    public ResponseEntity<String> login(@RequestBody @Valid AuthenticationDTO data) {
         String token = userService.login(data);
         return ResponseEntity.ok(token);
     }

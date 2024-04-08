@@ -20,15 +20,15 @@ public class AddressService {
     @Autowired
     private UserService userService;
 
-    public void newAdress(AddressRequestDTO addressData) {
+    public void newAddress(AddressRequestDTO data) {
         var user = new User(userService.getAuthUser());
         Address address = new Address(
-                addressData.zipCode(),
-                addressData.number(),
-                addressData.street(),
-                addressData.neighborhood(),
-                addressData.city(),
-                addressData.state(),
+                data.zipCode(),
+                data.number(),
+                data.street(),
+                data.neighborhood(),
+                data.city(),
+                data.state(),
                 user);
         user.getFilteredAdresses().add(address);
         addressRepository.save(address);

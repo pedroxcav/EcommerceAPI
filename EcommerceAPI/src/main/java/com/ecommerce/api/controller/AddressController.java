@@ -18,7 +18,7 @@ public class AddressController {
 
     @PostMapping("/new")
     public ResponseEntity<String> newAddress(@RequestBody @Valid AddressRequestDTO data) {
-        addressService.newAdress(data);
+        addressService.newAddress(data);
         return ResponseEntity.ok("Saved");
     }
     @GetMapping("/registered")

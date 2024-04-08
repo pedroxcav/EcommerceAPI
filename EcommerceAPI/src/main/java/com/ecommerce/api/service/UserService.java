@@ -4,7 +4,7 @@ import com.ecommerce.api.exception.InvalidCPFException;
 import com.ecommerce.api.exception.NullUserException;
 import com.ecommerce.api.exception.UserRegisteredException;
 import com.ecommerce.api.model.User;
-import com.ecommerce.api.model.dto.user.AthenticationDTO;
+import com.ecommerce.api.model.dto.user.AuthenticationDTO;
 import com.ecommerce.api.model.dto.user.RegistrationDTO;
 import com.ecommerce.api.model.dto.user.UserResponseDTO;
 import com.ecommerce.api.model.enums.Role;
@@ -50,10 +50,9 @@ public class UserService {
             throw new UserRegisteredException();
         var encoded = passwordEncoder.encode(data.password());
         userRepository.save(
-                new User(data.name(), data.username(), data.CPF(), data.email(), encoded, role)
-        );
+                new User(data.name(), data.username(), data.CPF(), data.email(), encoded, role));
     }
-    public String login(AthenticationDTO data) {
+    public String login(AuthenticationDTO data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.username(), data.password());
         var authentication = authenticationManager.authenticate(usernamePassword);
         return authnService.generateToken((User) authentication.getPrincipal());
