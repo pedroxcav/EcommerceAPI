@@ -14,13 +14,13 @@ import com.ecommerce.api.repository.UserRepository;
 import com.ecommerce.api.service.component.Validator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,24 +75,14 @@ public class UserService {
                         user.getPurchases()))
                 .collect(Collectors.toList());
     }
-    public UserResponseDTO getAuthUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails principal = (UserDetails) authentication.getPrincipal();
-        User user = (User) userRepository.findByUsername(principal.getUsername());
-        return new UserResponseDTO(
-                user.getId(),
-                user.getName(),
-                user.getUsername(),
-                user.getCPF(),
-                user.getEmail(),
-                user.getPassword(),
-                user.getRole(),
-                user.getNumber(),
-                user.getAdresses(),
-                user.getCart(),
-                user.getWishlist(),
-                user.getPurchases()
-        );
+    public Optional<User> getAuthnUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        if(principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
+            return userRepository.loadByUsername(username);
+        } else
+            throw new NullUserException();
     }
     public void deleteUser(String username) {
         User user = (User) userRepository.findByUsername(username);

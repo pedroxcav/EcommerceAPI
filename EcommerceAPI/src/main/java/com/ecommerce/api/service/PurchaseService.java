@@ -34,39 +34,44 @@ public class PurchaseService {
     }
 
     public void buyOrders(PurchaseRequestDTO data) {
-        var user = new User(userService.getAuthUser());
+        Optional<User> optionalUser = userService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            Optional<Address> optionalAddress = addressRepository.findById(data.addressId());
+            if(optionalAddress.isEmpty() || !user.getFilteredAdresses().contains(optionalAddress.get()))
+                throw new NullAddressException();
 
-        Optional<Address> optionalAddress = addressRepository.findById(data.addressId());
-        if(optionalAddress.isEmpty() || !user.getFilteredAdresses().contains(optionalAddress.get()))
-            throw new NullAddressException();
-
-        double totalPrice = 0D;
-        Set<Order> orderList = new HashSet<>();
-        for (Long id : data.orderIdSet()) {
-            Optional<Order> optionalOrder = orderRepository.findById(id);
-            if(optionalOrder.isEmpty())
-                throw new NullOrderException("One of the orders doesn't exist!");
-            else {
-                Order order = optionalOrder.get();
-                totalPrice += order.getPrice();
-                order.setCompleted(true);
-                orderList.add(order);
+            double totalPrice = 0D;
+            Set<Order> orderList = new HashSet<>();
+            for (Long id : data.orderIdSet()) {
+                Optional<Order> optionalOrder = orderRepository.findById(id);
+                if(optionalOrder.isEmpty() || !user.getCart().contains(optionalOrder.get()))
+                    throw new NullOrderException("The order doesn't exist in your cart!");
+                else {
+                    Order order = optionalOrder.get();
+                    totalPrice += order.getPrice();
+                    order.setCompleted(true);
+                    orderList.add(order);
+                }
             }
-        }
-        Purchase purchase = new Purchase(orderList, totalPrice, optionalAddress.get(), user);
-        orderList.forEach(order -> order.setPurchase(purchase));
-        purchaseRepository.save(purchase);
+            Purchase purchase = new Purchase(orderList, totalPrice, optionalAddress.get(), user);
+            orderList.forEach(order -> order.setPurchase(purchase));
+            purchaseRepository.save(purchase);
+        });
     }
     public Set<PurchaseResponseDTO> getUserPurchases() {
-        var user = new User(userService.getAuthUser());
-        return user.getPurchases().stream()
-                .map(purchase -> new PurchaseResponseDTO(
-                        purchase.getId(),
-                        purchase.getTotalPrice(),
-                        purchase.getOrders(),
-                        purchase.getAddress()
-                ))
-                .collect(Collectors.toSet());
+        Optional<User> optionalUser = userService.getAuthnUser();
+        if(optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return user.getPurchases().stream()
+                    .map(purchase -> new PurchaseResponseDTO(
+                            purchase.getId(),
+                            purchase.getTotalPrice(),
+                            purchase.getOrders(),
+                            purchase.getAddress()
+                    ))
+                    .collect(Collectors.toSet());
+        } else
+            return null;
     }
     public Set<PurchaseResponseDTO> getAllPurchases() {
         List<Purchase> purchasesList = purchaseRepository.findAll();

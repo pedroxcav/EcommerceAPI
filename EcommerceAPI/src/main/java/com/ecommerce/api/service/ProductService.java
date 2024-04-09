@@ -66,45 +66,53 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
     public void favorite(Long id) {
-        var user = new User(userService.getAuthUser());
-        Optional<Product> optionalProduct = productRepository.findById(id);
-        if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
-            var product = optionalProduct.get();
-            Set<Product> wishlist = user.getWishlist();
-            Set<User> userList = product.getUsers();
-            if(!wishlist.contains(product)) {
-                wishlist.add(product);
-                userList.add(user);
-                productRepository.save(product);
+        Optional<User> optionalUser = userService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            Optional<Product> optionalProduct = productRepository.findById(id);
+            if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
+                var product = optionalProduct.get();
+                Set<Product> wishlist = user.getWishlist();
+                Set<User> userList = product.getUsers();
+                if(!wishlist.contains(product)) {
+                    wishlist.add(product);
+                    userList.add(user);
+                    productRepository.save(product);
+                } else
+                    throw new WishlistProductException("The product was already favorited!");
             } else
-                throw new WishlistProductException("The product was already favorited!");
-        } else
-            throw new NullProductException();
+                throw new NullProductException();
+        });
     }
     public void unfavorite(Long id) {
-        var user = new User(userService.getAuthUser());
-        Optional<Product> optionalProduct = productRepository.findById(id);
-        if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
-            var product = optionalProduct.get();
-            Set<Product> wishlist = user.getWishlist();
-            Set<User> userList = product.getUsers();
-            if(wishlist.contains(product)) {
-                wishlist.remove(product);
-                userList.remove(user);
-                productRepository.save(product);
+        Optional<User> optionalUser = userService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            Optional<Product> optionalProduct = productRepository.findById(id);
+            if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
+                var product = optionalProduct.get();
+                Set<Product> wishlist = user.getWishlist();
+                Set<User> userList = product.getUsers();
+                if(wishlist.contains(product)) {
+                    wishlist.remove(product);
+                    userList.remove(user);
+                    productRepository.save(product);
+                } else
+                    throw new WishlistProductException("The product hasn't been favorited yet!");
             } else
-                throw new WishlistProductException("The product hasn't been favorited yet!");
-        } else
-            throw new NullProductException();
+                throw new NullProductException();
+        });
     }
     public Set<ProductResponseDTO> getUserWishlist() {
-        var user = new User(userService.getAuthUser());
-        return user.getWishlist().stream()
-                .map(product -> new ProductResponseDTO(
-                        product.getId(),
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice()
-                )).collect(Collectors.toSet());
+        Optional<User> optionalUser = userService.getAuthnUser();
+        if(optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return user.getWishlist().stream()
+                    .map(product -> new ProductResponseDTO(
+                            product.getId(),
+                            product.getName(),
+                            product.getDescription(),
+                            product.getPrice()
+                    )).collect(Collectors.toSet());
+        } else
+            return null;
     }
 }

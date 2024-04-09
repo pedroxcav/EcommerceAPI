@@ -2,10 +2,8 @@ package com.ecommerce.api.service;
 
 import com.ecommerce.api.exception.NullAddressException;
 import com.ecommerce.api.model.*;
-import com.ecommerce.api.model.Number;
 import com.ecommerce.api.model.dto.address.AddressRequestDTO;
 import com.ecommerce.api.model.dto.address.AddressResponseDTO;
-import com.ecommerce.api.model.dto.user.UserResponseDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.AddressRepository;
 import org.junit.jupiter.api.Assertions;
@@ -38,15 +36,17 @@ class AddressServiceTest {
                 "08510000", "10",
                 "streetName", "neighborhoodName",
                 "cityName", "stateName");
-        Set<Address> adresses = new HashSet<>();
-        List<Order> cart = new ArrayList<>();
-        Set<Product> wishlist = new HashSet<>();
-        List<Purchase> purchases = new ArrayList<>();
-        var number = new Number("11", "910000000", mock(User.class));
-        when(userService.getAuthUser()).thenReturn(
-                new UserResponseDTO(null,"Pedro Cavalcanti", "pedroxcav",
-                        "01010101010","pedroxcav@icloud.com","1234",
-                        Role.ADMIN, number, adresses, cart, wishlist, purchases));
+        var user = new User(
+                "Pedro Cavalcanti",
+                "pedroxcav",
+                "01010101010",
+                "pedroxcav@icloud.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
 
         addressService.newAddress(data);
 
@@ -63,20 +63,22 @@ class AddressServiceTest {
                 "streetName", "neighborhoodName",
                 "cityName", "stateName", mock(User.class));
         secondAddress.setId(2L);
-        Set<Address> adresses = Set.of(firstAddress, secondAddress);
-        List<Order> cart = new ArrayList<>();
-        Set<Product> wishlist = new HashSet<>();
-        List<Purchase> purchases = new ArrayList<>();
-        var number = new Number("11", "910000000", mock(User.class));
-        when(userService.getAuthUser()).thenReturn(
-                new UserResponseDTO(null,"Pedro Cavalcanti", "pedroxcav",
-                        "01010101010","pedroxcav@icloud.com","1234",
-                        Role.ADMIN, number, adresses, cart, wishlist, purchases));
+        var user = new User(
+                "Pedro Cavalcanti",
+                "pedroxcav",
+                "01010101010",
+                "pedroxcav@icloud.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(Set.of(firstAddress, secondAddress));
+        user.setCart(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
 
         Set<AddressResponseDTO> addressResponseDTOSet = addressService.getUserAdresses();
 
-        Assertions.assertEquals(adresses.size(), addressResponseDTOSet.size());
-        verify(userService, times(1)).getAuthUser();
+        Assertions.assertEquals(user.getAdresses().size(), addressResponseDTOSet.size());
+        verify(userService, times(1)).getAuthnUser();
     }
 
     @Test
@@ -86,20 +88,22 @@ class AddressServiceTest {
                 "cityName", "stateName", mock(User.class));
         address.setPurchases(new HashSet<>());
         address.setId(1L);
-        Set<Address> adresses = Set.of(address);
-        List<Order> cart = new ArrayList<>();
-        Set<Product> wishlist = new HashSet<>();
-        List<Purchase> purchases = new ArrayList<>();
-        var number = new Number("11", "910000000", mock(User.class));
+        var user = new User(
+                "Pedro Cavalcanti",
+                "pedroxcav",
+                "01010101010",
+                "pedroxcav@icloud.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(Set.of(address));
+        user.setCart(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
         when(addressRepository.findById(address.getId())).thenReturn(Optional.of(address));
-        when(userService.getAuthUser()).thenReturn(
-                new UserResponseDTO(null,"Pedro Cavalcanti", "pedroxcav",
-                        "01010101010","pedroxcav@icloud.com","1234",
-                        Role.ADMIN, number, adresses, cart, wishlist, purchases));
 
         Assertions.assertDoesNotThrow(() -> addressService.deleteAddress(address.getId()));
         verify(addressRepository, times(1)).findById(address.getId());
-        verify(userService, times(1)).getAuthUser();
+        verify(userService, times(1)).getAuthnUser();
     }
     @Test
     void deleteAddress_unsuccessful_case01() {
@@ -108,30 +112,32 @@ class AddressServiceTest {
                 "cityName", "stateName", mock(User.class));
         address.setPurchases(new HashSet<>());
         address.setId(1L);
-        Set<Address> adresses = new HashSet<>();
-        List<Order> cart = new ArrayList<>();
-        Set<Product> wishlist = new HashSet<>();
-        List<Purchase> purchases = new ArrayList<>();
-        var number = new Number("11", "910000000", mock(User.class));
+        var user = new User(
+                "Pedro Cavalcanti",
+                "pedroxcav",
+                "01010101010",
+                "pedroxcav@icloud.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
         when(addressRepository.findById(address.getId())).thenReturn(Optional.of(address));
-        when(userService.getAuthUser()).thenReturn(
-                new UserResponseDTO(null,"Pedro Cavalcanti", "pedroxcav",
-                        "01010101010","pedroxcav@icloud.com","1234",
-                        Role.ADMIN, number, adresses, cart, wishlist, purchases));
+        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
 
         Assertions.assertThrows(NullAddressException.class, () -> addressService.deleteAddress(address.getId()));
 
         verify(addressRepository, times(1)).findById(address.getId());
-        verify(userService, times(1)).getAuthUser();
+        verify(userService, times(1)).getAuthnUser();
     }
     @Test
     void deleteAddress_unsuccessful_case02() {
         when(addressRepository.findById(1L)).thenReturn(Optional.empty());
-        when(userService.getAuthUser()).thenReturn(mock(UserResponseDTO.class));
+        when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
 
         Assertions.assertThrows(NullAddressException.class, () -> addressService.deleteAddress(1L));
 
         verify(addressRepository, times(1)).findById(1L);
-        verify(userService, times(1)).getAuthUser();
+        verify(userService, times(1)).getAuthnUser();
     }
 }

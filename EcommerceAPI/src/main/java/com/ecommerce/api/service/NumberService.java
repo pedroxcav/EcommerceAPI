@@ -6,53 +6,67 @@ import com.ecommerce.api.model.Number;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.number.NumberDTO;
 import com.ecommerce.api.repository.NumberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class NumberService {
-    @Autowired
-    private NumberRepository numberRepository;
-    @Autowired
-    private UserService userService;
+    private final NumberRepository numberRepository;
+    private final UserService userService;
+
+    public NumberService(NumberRepository numberRepository, UserService userService) {
+        this.numberRepository = numberRepository;
+        this.userService = userService;
+    }
 
     public void newNumber(NumberDTO data) {
-        var user = new User(userService.getAuthUser());
-        if(user.getNumber() != null)
-            throw new NumberRegisteredException();
-        var number = new Number(
-                data.areaCode(),
-                data.number(),
-                user);
-        numberRepository.save(number);
+        Optional<User> optionalUser = userService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            if(user.getNumber() != null)
+                throw new NumberRegisteredException();
+            var number = new Number(
+                    data.areaCode(),
+                    data.number(),
+                    user);
+            numberRepository.save(number);
+        });
     }
     public void deleteNumber() {
-        var user = new User(userService.getAuthUser());
-        var number = user.getNumber();
-        if(number != null)
-            numberRepository.delete(number);
-        else
-            throw new NullNumberException();
+        Optional<User> optionalUser = userService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            var number = user.getNumber();
+            if(number != null)
+                numberRepository.delete(number);
+            else
+                throw new NullNumberException();
+        });
     }
     public void updateNumber(NumberDTO data) {
-        var user = new User(userService.getAuthUser());
-        var number = user.getNumber();
-        if(number != null) {
-            number.setAreaCode(data.areaCode());
-            number.setNumber(data.number());
-            numberRepository.save(number);
-        } else
-            throw new NullNumberException();
+        Optional<User> optionalUser = userService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            var number = user.getNumber();
+            if(number != null) {
+                number.setAreaCode(data.areaCode());
+                number.setNumber(data.number());
+                numberRepository.save(number);
+            } else
+                throw new NullNumberException();
+        });
     }
     public NumberDTO getUserNumber() {
-        var user = new User(userService.getAuthUser());
-        var number = user.getNumber();
-        if(number != null) {
-            return new NumberDTO(
-                    number.getAreaCode(),
-                    number.getNumber()
-            );
+        Optional<User> optionalUser = userService.getAuthnUser();
+        if(optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            var number = user.getNumber();
+            if(number != null) {
+                return new NumberDTO(
+                        number.getAreaCode(),
+                        number.getNumber()
+                );
+            } else
+                throw new NullNumberException();
         } else
-            throw new NullNumberException();
+            return null;
     }
 }

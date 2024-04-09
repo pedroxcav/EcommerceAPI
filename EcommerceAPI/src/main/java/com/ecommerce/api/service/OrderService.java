@@ -30,42 +30,50 @@ public class OrderService {
 
     public void addToCart(OrderRequestDTO data) {
         if(data.amount() < 1) throw new InvalidAmountException();
-        var user = new User(userService.getAuthUser());
-        Optional<Product> optionalProduct = productRepository.findById(data.productId());
-        if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
-            Product product = optionalProduct.get();
-            Optional<Order> optionalOrder = Optional.empty();
-            for (Order order : product.getOrders())
-                if(order.isCompleted() && user.getFilteredCart().contains(order))
-                    optionalOrder = Optional.of(order);
-            optionalOrder.ifPresentOrElse(
-                    order -> {
-                        int amount = order.getAmount() + data.amount();
-                        order.setAmount(amount);
-                        order.setPrice(amount * order.getProduct().getPrice());
-                        orderRepository.save(order);
-                    }, () -> orderRepository.save(
-                            new Order(product, data.amount(), product.getPrice() * data.amount(), user)));
-        } else
-            throw new NullProductException();
+        Optional<User> optionalUser = userService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            Optional<Product> optionalProduct = productRepository.findById(data.productId());
+            if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
+                Product product = optionalProduct.get();
+                Optional<Order> optionalOrder = Optional.empty();
+                for (Order order : product.getOrders())
+                    if(order.isCompleted() && user.getFilteredCart().contains(order))
+                        optionalOrder = Optional.of(order);
+                optionalOrder.ifPresentOrElse(
+                        order -> {
+                            int amount = order.getAmount() + data.amount();
+                            order.setAmount(amount);
+                            order.setPrice(amount * order.getProduct().getPrice());
+                            orderRepository.save(order);
+                        }, () -> orderRepository.save(
+                                new Order(product, data.amount(), product.getPrice() * data.amount(), user)));
+            } else
+                throw new NullProductException();
+        });
     }
     public void deleteFromCart(Long id) {
-        var user = new User(userService.getAuthUser());
-        Optional<Order> optionalOrder = orderRepository.findById(id);
-        if(optionalOrder.isPresent() && !optionalOrder.get().isCompleted() && user.getFilteredCart().contains(optionalOrder.get())) {
-            var order = optionalOrder.get();
-            orderRepository.delete(order);
-        } else
-            throw new NullOrderException("The order doesn't exist in your cart");
+        Optional<User> optionalUser = userService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            Optional<Order> optionalOrder = orderRepository.findById(id);
+            if(optionalOrder.isPresent() && !optionalOrder.get().isCompleted() && user.getFilteredCart().contains(optionalOrder.get())) {
+                var order = optionalOrder.get();
+                orderRepository.delete(order);
+            } else
+                throw new NullOrderException("The order doesn't exist in your cart");
+        });
     }
     public Set<OrderResponseDTO> getUserCart() {
-        var user = new User(userService.getAuthUser());
-        return user.getFilteredCart().stream()
-                .map(order -> new OrderResponseDTO(
-                        order.getId(),
-                        order.getAmount(),
-                        order.getPrice(),
-                        order.getProduct()
-                )).collect(Collectors.toSet());
+        Optional<User> optionalUser = userService.getAuthnUser();
+        if(optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return user.getFilteredCart().stream()
+                    .map(order -> new OrderResponseDTO(
+                            order.getId(),
+                            order.getAmount(),
+                            order.getPrice(),
+                            order.getProduct()
+                    )).collect(Collectors.toSet());
+        } else
+            return null;
     }
 }

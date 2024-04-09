@@ -141,26 +141,19 @@ class UserServiceTest {
 
     @Test
     void getAuthUser() {
-        var user = new User(
-                "Pedro Cavalcanti", "pedroxcav", "01010101010",
-                "pedroxcav@icloud.com", "1234", Role.ADMIN);
-        user.setWishlist(new HashSet<>());
-        user.setCart(new ArrayList<>());
-        user.setAdresses(new HashSet<>());
-        user.setPurchases(new ArrayList<>());
-
-        SecurityContextHolder.setContext(mock(SecurityContext.class));
+        User user = new User();
+        SecurityContext securityContext = mock(SecurityContext.class);
         Authentication authentication = mock(Authentication.class);
-        var principal = mock(UserDetails.class);
+        UserDetails userDetails = mock(UserDetails.class);
+        String username = "pedroxcav";
+        when(userDetails.getUsername()).thenReturn(username);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(userRepository.loadByUsername(username)).thenReturn(Optional.of(user));
 
-        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
-        when(authentication.getPrincipal()).thenReturn(principal);
-        when(userRepository.findByUsername(principal.getUsername())).thenReturn(user);
-
-        UserResponseDTO authUser = userService.getAuthUser();
-
-        Assertions.assertNotNull(authUser);
-        Assertions.assertEquals(user.getUsername(), authUser.username());
+        Optional<User> actualUser = userService.getAuthnUser();
+        Assertions.assertEquals(Optional.of(user), actualUser);
     }
 
     @Test

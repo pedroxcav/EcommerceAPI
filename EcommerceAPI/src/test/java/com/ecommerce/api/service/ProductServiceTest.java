@@ -3,10 +3,8 @@ package com.ecommerce.api.service;
 import com.ecommerce.api.exception.NullProductException;
 import com.ecommerce.api.exception.WishlistProductException;
 import com.ecommerce.api.model.*;
-import com.ecommerce.api.model.Number;
 import com.ecommerce.api.model.dto.product.ProductRequestDTO;
 import com.ecommerce.api.model.dto.product.ProductResponseDTO;
-import com.ecommerce.api.model.dto.user.UserResponseDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.ProductRepository;
@@ -86,16 +84,18 @@ class ProductServiceTest {
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
-        Set<Address> adresses = new HashSet<>();
-        List<Order> cart = new ArrayList<>();
-        Set<Product> wishlist = new HashSet<>();
-        List<Purchase> purchases = new ArrayList<>();
-        var number = new Number("11", "910000000", mock(User.class));
+        var user = new User(
+                "Pedro Cavalcanti",
+                "pedroxcav",
+                "01010101010",
+                "pedroxcav@icloud.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
-        when(userService.getAuthUser()).thenReturn(
-                new UserResponseDTO(null,"Pedro Cavalcanti", "pedroxcav",
-                        "01010101010","pedroxcav@icloud.com","1234",
-                        Role.ADMIN, number, adresses, cart, wishlist, purchases));
 
         Assertions.assertDoesNotThrow(() -> productService.favorite(product.getId()));
 
@@ -107,17 +107,20 @@ class ProductServiceTest {
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
-        Set<Address> adresses = new HashSet<>();
-        List<Order> cart = new ArrayList<>();
-        Set<Product> wishlist = new HashSet<>();
-        List<Purchase> purchases = new ArrayList<>();
-        wishlist.add(product);
-        var number = new Number("11", "910000000", mock(User.class));
+
+        var user = new User(
+                "Pedro Cavalcanti",
+                "pedroxcav",
+                "01010101010",
+                "pedroxcav@icloud.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        user.getWishlist().add(product);
+        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
-        when(userService.getAuthUser()).thenReturn(
-                new UserResponseDTO(null,"Pedro Cavalcanti", "pedroxcav",
-                        "01010101010","pedroxcav@icloud.com","1234",
-                        Role.ADMIN, number, adresses, cart, wishlist, purchases));
 
         Assertions.assertThrows(WishlistProductException.class, () -> productService.favorite(product.getId()));
         verify(productRepository, never()).save(product);
@@ -125,7 +128,7 @@ class ProductServiceTest {
     @Test
     void favorite_unsuccessful_case02() {
         when(productRepository.findById(1L)).thenReturn(Optional.empty());
-        when(userService.getAuthUser()).thenReturn(mock(UserResponseDTO.class));
+        when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
 
         Assertions.assertThrows(NullProductException.class, () -> productService.favorite(1L));
 
@@ -138,17 +141,19 @@ class ProductServiceTest {
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
+        var user = new User(
+                "Pedro Cavalcanti",
+                "pedroxcav",
+                "01010101010",
+                "pedroxcav@icloud.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        user.getWishlist().add(product);
+        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
-        Set<Address> adresses = new HashSet<>();
-        List<Order> cart = new ArrayList<>();
-        Set<Product> wishlist = new HashSet<>();
-        List<Purchase> purchases = new ArrayList<>();
-        wishlist.add(product);
-        var number = new Number("11", "910000000", mock(User.class));
-        when(userService.getAuthUser()).thenReturn(
-                new UserResponseDTO(null,"Pedro Cavalcanti", "pedroxcav",
-                        "01010101010","pedroxcav@icloud.com","1234",
-                        Role.ADMIN, number, adresses, cart, wishlist, purchases));
 
         productService.unfavorite(product.getId());
 
@@ -160,16 +165,19 @@ class ProductServiceTest {
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
-        Set<Address> adresses = new HashSet<>();
-        List<Order> cart = new ArrayList<>();
-        Set<Product> wishlist = new HashSet<>();
-        List<Purchase> purchases = new ArrayList<>();
-        var number = new Number("11", "910000000", mock(User.class));
+
+        var user = new User(
+                "Pedro Cavalcanti",
+                "pedroxcav",
+                "01010101010",
+                "pedroxcav@icloud.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
-        when(userService.getAuthUser()).thenReturn(
-                new UserResponseDTO(null,"Pedro Cavalcanti", "pedroxcav",
-                        "01010101010","pedroxcav@icloud.com","1234",
-                        Role.ADMIN, number, adresses, cart, wishlist, purchases));
 
         Assertions.assertThrows(WishlistProductException.class, () -> productService.unfavorite(product.getId()));
 
@@ -178,7 +186,7 @@ class ProductServiceTest {
     @Test
     void unfavorite_unsuccessful_case02() {
         when(productRepository.findById(1L)).thenReturn(Optional.empty());
-        when(userService.getAuthUser()).thenReturn(mock(UserResponseDTO.class));
+        when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
 
         Assertions.assertThrows(NullProductException.class, () -> productService.unfavorite(1L));
 
@@ -191,19 +199,21 @@ class ProductServiceTest {
         var secondProduct = new Product("Iphone", "Apple smartphone.", 5000D);
         firstProduct.setId(1L);
         secondProduct.setId(2L);
-        Set<Address> adresses = new HashSet<>();
-        List<Order> cart = new ArrayList<>();
-        Set<Product> wishlist = Set.of(firstProduct, secondProduct);
-        List<Purchase> purchases = new ArrayList<>();
-        var number = new Number("11", "910000000", mock(User.class));
-        when(userService.getAuthUser()).thenReturn(
-                new UserResponseDTO(null,"Pedro Cavalcanti", "pedroxcav",
-                        "01010101010","pedroxcav@icloud.com","1234",
-                        Role.ADMIN, number, adresses, cart, wishlist, purchases));
+        var user = new User(
+                "Pedro Cavalcanti",
+                "pedroxcav",
+                "01010101010",
+                "pedroxcav@icloud.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(new ArrayList<>());
+        user.setWishlist(Set.of(firstProduct, secondProduct));
+        user.setPurchases(new ArrayList<>());
+        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
 
         Set<ProductResponseDTO> productResponseDTOSet = productService.getUserWishlist();
 
-        Assertions.assertEquals(wishlist.size(), productResponseDTOSet.size());
-        verify(userService, times(1)).getAuthUser();
+        Assertions.assertEquals(user.getWishlist().size(), productResponseDTOSet.size());
+        verify(userService, times(1)).getAuthnUser();
     }
 }
