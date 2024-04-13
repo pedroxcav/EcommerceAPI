@@ -9,6 +9,7 @@ import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.NumberRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,12 +33,10 @@ class NumberServiceTest {
     }
 
     @Test
+    @DisplayName("Register Number Successfully")
     void newNumber_successful() {
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -50,12 +49,10 @@ class NumberServiceTest {
         verify(userService, times(1)).getAuthnUser();
     }
     @Test
+    @DisplayName("Number Already Registered")
     void newNumber_unsuccessful() {
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -70,12 +67,10 @@ class NumberServiceTest {
     }
 
     @Test
+    @DisplayName("Delete Successfully")
     void deleteNumber_successful() {
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -89,12 +84,10 @@ class NumberServiceTest {
         verify(numberRepository, times(1)).delete(any(Number.class));
     }
     @Test
+    @DisplayName("Delete Unsuccessfully - NonExistent")
     void deleteNumber_unsuccessful() {
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -108,12 +101,10 @@ class NumberServiceTest {
     }
 
     @Test
+    @DisplayName("Update Successfully")
     void updateNumber_successful() {
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -127,12 +118,10 @@ class NumberServiceTest {
         verify(userService, times(1)).getAuthnUser();
     }
     @Test
+    @DisplayName("Update Unsuccessfully - NonExistent")
     void updateNumber_unsuccessful() {
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -140,18 +129,18 @@ class NumberServiceTest {
         user.setPurchases(new ArrayList<>());
         when(userService.getAuthnUser()).thenReturn(Optional.of(user));
 
-        Assertions.assertThrows(NullNumberException.class, () -> numberService.updateNumber(new NumberDTO("11","910000000")));
+        Assertions.assertThrows(
+                NullNumberException.class,
+                () -> numberService.updateNumber(new NumberDTO("11","910000000")));
         verify(userService, times(1)).getAuthnUser();
         verify(numberRepository, never()).save(any(Number.class));
     }
 
     @Test
+    @DisplayName("Get User Number Successfully")
     void getUserNumber_successful() {
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -166,12 +155,10 @@ class NumberServiceTest {
         verify(userService, times(1)).getAuthnUser();
     }
     @Test
+    @DisplayName("Get User Number Unsuccessfully - NonExistent")
     void getUserNumber_unsuccessful() {
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());

@@ -33,7 +33,7 @@ public class AddressService {
                     data.city(),
                     data.state(),
                     user);
-            user.getFilteredAdresses().add(address);
+            user.getActiveAdresses().add(address);
             addressRepository.save(address);
         });
     }
@@ -41,7 +41,7 @@ public class AddressService {
         Optional<User> optionalUser = userService.getAuthnUser();
         if(optionalUser.isPresent()){
             User user = optionalUser.get();
-            return user.getFilteredAdresses().stream()
+            return user.getActiveAdresses().stream()
                     .map(address -> new AddressResponseDTO(
                             address.getId(),
                             address.getZipCode(),
@@ -60,7 +60,7 @@ public class AddressService {
             Optional<Address> optionalAddress = addressRepository.findById(id);
             if(optionalAddress.isPresent() && optionalAddress.get().isActive()) {
                 Address address = optionalAddress.get();
-                Set<Address> adresses = user.getFilteredAdresses();
+                Set<Address> adresses = user.getActiveAdresses();
                 if(adresses.contains(optionalAddress.get())) {
                     if(!address.getPurchases().isEmpty()) {
                         address.setActive(false);

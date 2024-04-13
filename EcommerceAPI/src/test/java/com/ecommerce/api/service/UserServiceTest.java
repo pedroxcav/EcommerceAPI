@@ -12,6 +12,7 @@ import com.ecommerce.api.repository.AddressRepository;
 import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.UserRepository;
 import com.ecommerce.api.service.component.Validator;
+import org.junit.jupiter.api.DisplayName;
 import org.springframework.security.core.Authentication;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,14 +39,14 @@ class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private OrderRepository orderRepository;
-    @InjectMocks
-    private UserService userService;
     @Mock
     private AuthnService authnService;
     @Mock
     private AddressRepository addressRepository;
     @Mock
     private AuthenticationManager authenticationManager;
+    @InjectMocks
+    private UserService userService;
 
     @BeforeEach
     void setup() {
@@ -53,12 +54,13 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Register Successfully")
     void register_successful() {
         var data = new RegistrationDTO(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+                "Admin",
+                "admin",
+                "24512127801",
+                "admin@gmail.com",
                 "1234");
         var role = Role.ADMIN;
 
@@ -71,12 +73,13 @@ class UserServiceTest {
         verify(userRepository, times(1)).save(any(User.class));
     }
     @Test
+    @DisplayName("Register Unsuccessfully - Invalid CPF")
     void register_unsuccessful_case1() {
         var data = new RegistrationDTO(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+                "Admin",
+                "admin",
+                "24512127801",
+                "admin@gmail.com",
                 "1234");
         var role = Role.ADMIN;
 
@@ -85,12 +88,13 @@ class UserServiceTest {
         Assertions.assertThrows(InvalidCPFException.class, () -> userService.register(data, role));
     }
     @Test
+    @DisplayName("Register Unsuccessfully - Already In")
     void register_unsuccessful_case2() {
         var data = new RegistrationDTO(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+                "Admin",
+                "admin",
+                "24512127801",
+                "admin@gmail.com",
                 "1234");
         var role = Role.ADMIN;
 
@@ -101,8 +105,9 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Login Successfully")
     void login_successful() {
-        var data = new AuthenticationDTO("pedroxcav","1245");
+        var data = new AuthenticationDTO("admin","1245");
         Authentication authentication = mock(Authentication.class);
 
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
@@ -116,17 +121,20 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Get All Users Successfully")
     void getAllUsers() {
         var firstUser = new User(
-                "Pedro Cavalcanti", "pedroxcav", "01010101010",
-                "pedroxcav@icloud.com", "1234", Role.ADMIN);
+                "Admin", "admin",
+                "24512127801", "admin@gmail.com",
+                "1234", Role.ADMIN);
         firstUser.setWishlist(new HashSet<>());
         firstUser.setCart(new ArrayList<>());
         firstUser.setAdresses(new HashSet<>());
         firstUser.setPurchases(new ArrayList<>());
         var secondUser = new User(
-                "Pedro Cavalcanti", "pedroxcav", "01010101010",
-                "pedroxcav@icloud.com", "1234", Role.ADMIN);
+                "Admin", "admin",
+                "24512127801", "admin@gmail.com",
+                "1234", Role.ADMIN);
         secondUser.setWishlist(new HashSet<>());
         secondUser.setCart(new ArrayList<>());
         secondUser.setAdresses(new HashSet<>());
@@ -140,12 +148,13 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Get Authenticated User Successfully")
     void getAuthUser() {
         User user = new User();
         SecurityContext securityContext = mock(SecurityContext.class);
         Authentication authentication = mock(Authentication.class);
         UserDetails userDetails = mock(UserDetails.class);
-        String username = "pedroxcav";
+        String username = "admin";
         when(userDetails.getUsername()).thenReturn(username);
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -157,10 +166,11 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Delete Successfully")
     void deleteUser_successful() {
-        var user = new User(
-                "Pedro Cavalcanti", "pedroxcav", "01010101010",
-                "pedroxcav@icloud.com", "1234", Role.ADMIN);
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
+                "1234", Role.ADMIN);
         user.setWishlist(new HashSet<>());
         user.setCart(new ArrayList<>());
         user.setAdresses(new HashSet<>());
@@ -179,6 +189,7 @@ class UserServiceTest {
         verify(mockedPurchase, never()).setUser(null);
     }
     @Test
+    @DisplayName("Delete Unsuccessfully - NonExistent")
     void deleteUser_unsuccessful() {
         when(userRepository.findByUsername(any(String.class))).thenReturn(null);
 

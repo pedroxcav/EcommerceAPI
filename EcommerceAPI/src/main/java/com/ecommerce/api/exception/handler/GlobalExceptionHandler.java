@@ -30,7 +30,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             NullNumberException.class,
             NullOrderException.class,
             NullProductException.class,
-            NullProductException.class,
             NullUserException.class})
     private ResponseEntity<ExceptionResponseDTO> nullEntityHandler(RuntimeException exception) {
         var exceptionResponseDTO = new ExceptionResponseDTO(

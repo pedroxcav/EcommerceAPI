@@ -37,7 +37,7 @@ public class OrderService {
                 Product product = optionalProduct.get();
                 Optional<Order> optionalOrder = Optional.empty();
                 for (Order order : product.getOrders())
-                    if(order.isCompleted() && user.getFilteredCart().contains(order))
+                    if(order.isCompleted() && user.getActiveCart().contains(order))
                         optionalOrder = Optional.of(order);
                 optionalOrder.ifPresentOrElse(
                         order -> {
@@ -55,7 +55,7 @@ public class OrderService {
         Optional<User> optionalUser = userService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             Optional<Order> optionalOrder = orderRepository.findById(id);
-            if(optionalOrder.isPresent() && !optionalOrder.get().isCompleted() && user.getFilteredCart().contains(optionalOrder.get())) {
+            if(optionalOrder.isPresent() && !optionalOrder.get().isCompleted() && user.getActiveCart().contains(optionalOrder.get())) {
                 var order = optionalOrder.get();
                 orderRepository.delete(order);
             } else
@@ -66,7 +66,7 @@ public class OrderService {
         Optional<User> optionalUser = userService.getAuthnUser();
         if(optionalUser.isPresent()) {
             User user = optionalUser.get();
-            return user.getFilteredCart().stream()
+            return user.getActiveCart().stream()
                     .map(order -> new OrderResponseDTO(
                             order.getId(),
                             order.getAmount(),

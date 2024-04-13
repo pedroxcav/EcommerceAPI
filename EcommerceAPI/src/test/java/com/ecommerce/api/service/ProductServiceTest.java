@@ -10,6 +10,7 @@ import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.ProductRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -35,6 +36,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("Register Successfully")
     void newProduct() {
         var data = new ProductRequestDTO("Iphone", "Apple smartphone.", 5000D);
 
@@ -44,6 +46,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("Delete Successfully")
     void deleteProduct_successful() {
         Product product = new Product("Iphone", "Apple smartphone.", 5000D);
         product.setOrders(new HashSet<>());
@@ -58,6 +61,7 @@ class ProductServiceTest {
         verify(productRepository, times(1)).delete(product);
     }
     @Test
+    @DisplayName("Delete Unsuccessfully - NonExistent")
     void deleteProduct_unsuccessful() {
         when(productRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
@@ -67,6 +71,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("Get ALl Products Successfully")
     void getAllProducts() {
         var firstProduct = new Product("Iphone", "Apple smartphone.", 5000D);
         var secondProduct = new Product("Iphone", "Apple smartphone.", 5000D);
@@ -79,16 +84,14 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("Favorite Successfully")
     void favorite_successful() {
         var product = new Product("Iphone", "Apple smartphone.", 5000D);
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -102,17 +105,15 @@ class ProductServiceTest {
         verify(productRepository, times(1)).save(product);
     }
     @Test
+    @DisplayName("Product Already Favorited")
     void favorite_unsuccessful_case01() {
         var product = new Product("Iphone", "Apple smartphone.", 5000D);
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
 
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -126,6 +127,7 @@ class ProductServiceTest {
         verify(productRepository, never()).save(product);
     }
     @Test
+    @DisplayName("Favorite Unsuccessfully - NonExistent")
     void favorite_unsuccessful_case02() {
         when(productRepository.findById(1L)).thenReturn(Optional.empty());
         when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
@@ -136,16 +138,14 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("Unfavorite Successfully")
     void unfavorite_successful() {
         var product = new Product("Iphone", "Apple smartphone.", 5000D);
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -160,17 +160,15 @@ class ProductServiceTest {
         verify(productRepository, times(1)).save(product);
     }
     @Test
+    @DisplayName("Product Doesn't Favorited")
     void unfavorite_unsuccessful_case01() {
         var product = new Product("Iphone", "Apple smartphone.", 5000D);
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
 
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -184,6 +182,7 @@ class ProductServiceTest {
         verify(productRepository, never()).save(product);
     }
     @Test
+    @DisplayName("Unfavorite Unsuccessfully - NonExistent")
     void unfavorite_unsuccessful_case02() {
         when(productRepository.findById(1L)).thenReturn(Optional.empty());
         when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
@@ -194,16 +193,14 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("Get User Wishlist Successfully")
     void getUserWishlist() {
         var firstProduct = new Product("Iphone", "Apple smartphone.", 5000D);
         var secondProduct = new Product("Iphone", "Apple smartphone.", 5000D);
         firstProduct.setId(1L);
         secondProduct.setId(2L);
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());

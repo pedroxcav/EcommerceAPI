@@ -5,6 +5,7 @@ import com.ecommerce.api.model.dto.user.RegistrationDTO;
 import com.ecommerce.api.model.enums.Role;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -21,12 +22,13 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
+    @DisplayName("Load User Successfully")
     void loadByUsername_successful() {
         var data = new RegistrationDTO(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+                "Admin",
+                "admin",
+                "24512127801",
+                "admin@gmail.com",
                 "1234");
         this.register(data);
         Optional<User> optionalUser = this.userRepository.loadByUsername(data.username());
@@ -34,8 +36,9 @@ class UserRepositoryTest {
         Assertions.assertEquals(data.username(), optionalUser.get().getUsername());
     }
     @Test
+    @DisplayName("Load User Unsuccessfully")
     void loadByUsername_unsuccessful() {
-        Optional<User> optionalUser = this.userRepository.loadByUsername("pedroxcav");
+        Optional<User> optionalUser = this.userRepository.loadByUsername("admin");
         Assertions.assertTrue(optionalUser.isEmpty());
     }
 

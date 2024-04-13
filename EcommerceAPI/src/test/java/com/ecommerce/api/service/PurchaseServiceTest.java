@@ -11,6 +11,7 @@ import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.PurchaseRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -38,10 +39,11 @@ class PurchaseServiceTest {
     }
 
     @Test
+    @DisplayName("Buy Order Successfully")
     void buyOrders_successful() {
-        var address = new Address("08510000", "10",
-                "streetName", "neighborhoodName",
-                "cityName", "stateName", mock(User.class));
+        var address = new Address("08510000", "House Number",
+                "Street Name", "Neighborhood Name",
+                "City Name", "State Name", mock(User.class));
         address.setPurchases(new HashSet<>());
 
         var product = new Product("Iphone", "Apple Smartphone.",5000D);
@@ -52,11 +54,8 @@ class PurchaseServiceTest {
         var order = new Order(product, 2, 10000D, mock(User.class));
         order.setId(1L);
 
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(Set.of(address));
         user.setCart(List.of(order));
@@ -74,10 +73,11 @@ class PurchaseServiceTest {
         verify(userService, times(1)).getAuthnUser();
     }
     @Test
+    @DisplayName("Unsuccessfully - Address NonExistent")
     void buyOrders_unsuccessful_case01() {
-        var address = new Address("08510000", "10",
-                "streetName", "neighborhoodName",
-                "cityName", "stateName", mock(User.class));
+        var address = new Address("08510000", "House Number",
+                "Street Name", "Neighborhood Name",
+                "City Name", "State Name", mock(User.class));
         address.setPurchases(new HashSet<>());
 
         var data = new PurchaseRequestDTO(Set.of(1L), address.getId());
@@ -91,17 +91,15 @@ class PurchaseServiceTest {
         verify(orderRepository, never()).findById(any());
     }
     @Test
+    @DisplayName("Unsuccessfully - Order NonExistent")
     void buyOrders_unsuccessful_case02() {
-        var address = new Address("08510000", "10",
-                "streetName", "neighborhoodName",
-                "cityName", "stateName", mock(User.class));
+        var address = new Address("08510000", "House Number",
+                "Street Name", "Neighborhood Name",
+                "City Name", "State Name", mock(User.class));
         address.setPurchases(new HashSet<>());
 
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(Set.of(address));
         user.setCart(new ArrayList<>());
@@ -120,6 +118,7 @@ class PurchaseServiceTest {
     }
 
     @Test
+    @DisplayName("Get User Purchases Successfully")
     void getUserPurchases_successful() {
         var firstPurchase = new Purchase(
                 Set.of(mock(Order.class), mock(Order.class)),
@@ -130,11 +129,8 @@ class PurchaseServiceTest {
                 10000D, mock(Address.class), mock(User.class));
         secondPurchase.setId(2L);
 
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -148,6 +144,7 @@ class PurchaseServiceTest {
     }
 
     @Test
+    @DisplayName("Get All Purchases Successfully")
     void getAllPurchases_successful() {
         var firstPurchase = new Purchase(
                 Set.of(mock(Order.class), mock(Order.class)),

@@ -11,6 +11,7 @@ import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.ProductRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -36,17 +37,15 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Add Successfully")
     void addToCart_successful() {
         var product = new Product("Iphone", "Apple Smartphone.",5000D);
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
 
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -63,17 +62,15 @@ class OrderServiceTest {
         verify(userService, times(1)).getAuthnUser();
     }
     @Test
+    @DisplayName("Add Unsuccessfully - Invalid Amount")
     void addToCart_unsuccessful_case01() {
         var product = new Product("Iphone", "Apple Smartphone.",5000D);
         product.setOrders(new HashSet<>());
         product.setUsers(new HashSet<>());
         product.setId(1L);
 
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -89,6 +86,7 @@ class OrderServiceTest {
         verify(userService, never()).getAuthnUser();
     }
     @Test
+    @DisplayName("Add Unsuccessfully - NonExistent Product")
     void addToCart_unsuccessful_case02() {
         var product = new Product("Iphone", "Apple Smartphone.",5000D);
         product.setOrders(new HashSet<>());
@@ -107,6 +105,7 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Delete Successfully")
     void deleteFromCart_successful() {
         var product = new Product("Iphone", "Apple Smartphone.",5000D);
         product.setOrders(new HashSet<>());
@@ -116,11 +115,8 @@ class OrderServiceTest {
         var order = new Order(product, 2, 10000D, mock(User.class));
         order.setId(1L);
 
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(List.of(order));
@@ -134,6 +130,7 @@ class OrderServiceTest {
         verify(userService, times(1)).getAuthnUser();
     }
     @Test
+    @DisplayName("Delete Unsuccessfully - NonExistent Order")
     void deleteFromCart_unsuccessful() {
         var product = new Product("Iphone", "Apple Smartphone.",5000D);
         product.setOrders(new HashSet<>());
@@ -152,6 +149,7 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Get User Cart Successfully")
     void getUserCart() {
         var product = new Product("Iphone", "Apple Smartphone.",5000D);
         product.setOrders(new HashSet<>());
@@ -163,11 +161,8 @@ class OrderServiceTest {
         firstOrder.setId(1L);
         secondOrder.setId(2L);
 
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(List.of(firstOrder, secondOrder));

@@ -69,8 +69,8 @@ public class UserService {
                         user.getPassword(),
                         user.getRole(),
                         user.getNumber(),
-                        user.getFilteredAdresses(),
-                        user.getFilteredCart(),
+                        user.getActiveAdresses(),
+                        user.getActiveCart(),
                         user.getWishlist(),
                         user.getPurchases()))
                 .collect(Collectors.toList());

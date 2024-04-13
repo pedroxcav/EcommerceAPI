@@ -37,7 +37,7 @@ public class PurchaseService {
         Optional<User> optionalUser = userService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             Optional<Address> optionalAddress = addressRepository.findById(data.addressId());
-            if(optionalAddress.isEmpty() || !user.getFilteredAdresses().contains(optionalAddress.get()))
+            if(optionalAddress.isEmpty() || !user.getActiveAdresses().contains(optionalAddress.get()))
                 throw new NullAddressException();
 
             double totalPrice = 0D;

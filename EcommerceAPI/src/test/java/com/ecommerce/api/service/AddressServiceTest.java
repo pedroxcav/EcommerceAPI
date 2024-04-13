@@ -8,6 +8,7 @@ import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.AddressRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -31,16 +32,13 @@ class AddressServiceTest {
     }
 
     @Test
-    void newAddress_successful() {
-        var data = new AddressRequestDTO(
-                "08510000", "10",
-                "streetName", "neighborhoodName",
-                "cityName", "stateName");
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+    @DisplayName("Register Address Successfully")
+    void newAddress() {
+        var data = new AddressRequestDTO("08510000", "House Number",
+                "Street Name", "Neighborhood Name",
+                "City Name", "State Name");
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -54,20 +52,18 @@ class AddressServiceTest {
     }
 
     @Test
-    void getUserAdresses_successful() {
-        var firstAddress = new Address("08510000", "10",
-                "streetName", "neighborhoodName",
-                "cityName", "stateName", mock(User.class));
+    @DisplayName("Get User Adresses Successfully")
+    void getUserAdresses() {
+        var firstAddress = new Address("08510000", "House Number",
+                "Street Name", "Neighborhood Name",
+                "City Name", "State Name", mock(User.class));
         firstAddress.setId(1L);
-        var secondAddress = new Address("08510000", "10",
-                "streetName", "neighborhoodName",
-                "cityName", "stateName", mock(User.class));
+        var secondAddress = new Address("08510000", "House Number",
+                "Street Name", "Neighborhood Name",
+                "City Name", "State Name", mock(User.class));
         secondAddress.setId(2L);
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(Set.of(firstAddress, secondAddress));
         user.setCart(new ArrayList<>());
@@ -82,17 +78,15 @@ class AddressServiceTest {
     }
 
     @Test
+    @DisplayName("Delete Successfully")
     void deleteAddress_successful() {
-        var address = new Address("08510000", "10",
-                "streetName", "neighborhoodName",
-                "cityName", "stateName", mock(User.class));
+        var address = new Address("08510000", "House Number",
+                "Street Name", "Neighborhood Name",
+                "City Name", "State Name", mock(User.class));
         address.setPurchases(new HashSet<>());
         address.setId(1L);
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(Set.of(address));
         user.setCart(new ArrayList<>());
@@ -106,17 +100,15 @@ class AddressServiceTest {
         verify(userService, times(1)).getAuthnUser();
     }
     @Test
+    @DisplayName("Delete Unsuccessfully - Non Existent In List")
     void deleteAddress_unsuccessful_case01() {
-        var address = new Address("08510000", "10",
-                "streetName", "neighborhoodName",
-                "cityName", "stateName", mock(User.class));
+        var address = new Address("08510000", "House Number",
+                "Street Name", "Neighborhood Name",
+                "City Name", "State Name", mock(User.class));
         address.setPurchases(new HashSet<>());
         address.setId(1L);
-        var user = new User(
-                "Pedro Cavalcanti",
-                "pedroxcav",
-                "01010101010",
-                "pedroxcav@icloud.com",
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
                 "1234", Role.ADMIN);
         user.setAdresses(new HashSet<>());
         user.setCart(new ArrayList<>());
@@ -131,6 +123,7 @@ class AddressServiceTest {
         verify(userService, times(1)).getAuthnUser();
     }
     @Test
+    @DisplayName("Delete Unsuccessfully - Non Existent")
     void deleteAddress_unsuccessful_case02() {
         when(addressRepository.findById(1L)).thenReturn(Optional.empty());
         when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));

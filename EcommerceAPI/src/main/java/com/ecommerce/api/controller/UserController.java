@@ -21,12 +21,12 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody @Valid RegistrationDTO data) {
         userService.register(data, Role.USER);
-        return ResponseEntity.ok("Registred");
+        return ResponseEntity.ok("Registered");
     }
     @PostMapping("/register/admin")
     public ResponseEntity<String> registerAdmin(@RequestBody @Valid RegistrationDTO data) {
         userService.register(data, Role.ADMIN);
-        return ResponseEntity.ok("Registred");
+        return ResponseEntity.ok("Registered");
     }
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody @Valid AuthenticationDTO data) {

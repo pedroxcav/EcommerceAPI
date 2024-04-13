@@ -39,11 +39,11 @@ public class User implements UserDetails {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Number number;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<Address> adresses;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Order> cart;
-    @ManyToMany(mappedBy = "users")
+    @ManyToMany(mappedBy = "users", fetch = FetchType.EAGER)
     private Set<Product> wishlist;
     @OneToMany(mappedBy = "user")
     private List<Purchase> purchases;
@@ -98,12 +98,12 @@ public class User implements UserDetails {
         return true;
     }
 
-    public Set<Address> getFilteredAdresses() {
+    public Set<Address> getActiveAdresses() {
         return adresses.stream()
                 .filter(Address::isActive)
                 .collect(Collectors.toSet());
     }
-    public List<Order> getFilteredCart() {
+    public List<Order> getActiveCart() {
         return cart.stream()
                 .filter(order -> !order.isCompleted())
                 .collect(Collectors.toList());
