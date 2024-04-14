@@ -11,22 +11,22 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/purchase")
+@RequestMapping("/purchases")
 public class PurchaseController {
     @Autowired
     private PurchaseService purchaseService;
 
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<String> buyOrders(@RequestBody @Valid PurchaseRequestDTO data) {
         purchaseService.buyOrders(data);
         return ResponseEntity.ok("Bought");
     }
-    @GetMapping("/user")
+    @GetMapping("/me")
     public ResponseEntity<Set<PurchaseResponseDTO>> getUserPurchases() {
         var userPurchases = purchaseService.getUserPurchases();
         return ResponseEntity.ok(userPurchases);
     }
-    @GetMapping("/registered")
+    @GetMapping
     public ResponseEntity<Set<PurchaseResponseDTO>> getAllPurchases() {
         var purchaseSet = purchaseService.getAllPurchases();
         return ResponseEntity.ok(purchaseSet);

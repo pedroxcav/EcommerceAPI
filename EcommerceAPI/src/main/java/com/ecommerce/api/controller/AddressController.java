@@ -11,22 +11,22 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/address")
+@RequestMapping("/adresses")
 public class AddressController {
     @Autowired
     private AddressService addressService;
 
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<String> newAddress(@RequestBody @Valid AddressRequestDTO data) {
         addressService.newAddress(data);
         return ResponseEntity.ok("Saved");
     }
-    @GetMapping("/registered")
+    @GetMapping("/me")
     public ResponseEntity<Set<AddressResponseDTO>> getUserAdresses() {
         var addressResponseDTOList = addressService.getUserAdresses();
         return ResponseEntity.ok(addressResponseDTOList);
     }
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAddress(@PathVariable @Valid Long id) {
         addressService.deleteAddress(id);
         return ResponseEntity.ok("Deleted");

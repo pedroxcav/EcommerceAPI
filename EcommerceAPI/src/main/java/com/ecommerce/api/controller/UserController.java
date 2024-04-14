@@ -13,17 +13,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<String> registerUser(@RequestBody @Valid RegistrationDTO data) {
         userService.register(data, Role.USER);
         return ResponseEntity.ok("Registered");
     }
-    @PostMapping("/register/admin")
+    @PostMapping("/admin")
     public ResponseEntity<String> registerAdmin(@RequestBody @Valid RegistrationDTO data) {
         userService.register(data, Role.ADMIN);
         return ResponseEntity.ok("Registered");
@@ -33,12 +33,12 @@ public class UserController {
         String token = userService.login(data);
         return ResponseEntity.ok(token);
     }
-    @GetMapping("/registered")
+    @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         var registrationDTOList = userService.getAllUsers();
         return ResponseEntity.ok(registrationDTOList);
     }
-    @DeleteMapping("/delete/{username}")
+    @DeleteMapping("/{username}")
     public ResponseEntity<String> deleteUser(@PathVariable(name = "username") String username) {
         userService.deleteUser(username);
         return ResponseEntity.ok("Deleted");

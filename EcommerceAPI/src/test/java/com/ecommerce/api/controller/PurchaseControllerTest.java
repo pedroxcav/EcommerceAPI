@@ -74,7 +74,7 @@ class PurchaseControllerTest {
                         "City Name", "State Name", user));
         orderRepository.save(new Order(product, 2, product.getPrice() * 2, user));
         mvc.perform(MockMvcRequestBuilders
-                .post("/purchase/new")
+                .post("/purchases")
                 .header("Authorization", "Bearer " + authnService.generateToken(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -93,10 +93,10 @@ class PurchaseControllerTest {
                 new Product("Iphone", "Apple smartphone.", 5000D));
         orderRepository.save(new Order(product, 2, product.getPrice() * 2, user));
         mvc.perform(MockMvcRequestBuilders
-                        .post("/purchase/new")
-                        .header("Authorization", "Bearer " + authnService.generateToken(user))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                .post("/purchases")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
                 .andExpect(status().isNotFound());
 
     }
@@ -114,7 +114,7 @@ class PurchaseControllerTest {
                 "House Number", "Neighborhood Name",
                 "City Name", "State Name", user));
         mvc.perform(MockMvcRequestBuilders
-                        .post("/purchase/new")
+                        .post("/purchases")
                         .header("Authorization", "Bearer " + authnService.generateToken(user))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -125,7 +125,7 @@ class PurchaseControllerTest {
     @DisplayName("Get User Purchases Successfully")
     void getUserPurchases() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .get("/purchase/user")
+                .get("/purchases/me")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
     }
@@ -134,7 +134,7 @@ class PurchaseControllerTest {
     @DisplayName("Get All Purchases Successfully")
     void getAllPurchases_successful() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                        .get("/purchase/registered")
+                        .get("/purchases")
                         .header("Authorization", "Bearer " + authnService.generateToken(admin)))
                 .andExpect(status().isOk());
     }
@@ -142,7 +142,7 @@ class PurchaseControllerTest {
     @DisplayName("Get All Purchases Unsuccessfully")
     void getAllPurchases_unsuccessful() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                        .get("/purchase/registered")
+                        .get("/purchases")
                         .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isForbidden());
     }

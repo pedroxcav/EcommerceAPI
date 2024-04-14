@@ -79,7 +79,7 @@ class AddressControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                .post("/address/new")
+                .post("/adresses")
                 .header("Authorization", "Bearer " + authnService.generateToken(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -90,7 +90,7 @@ class AddressControllerTest {
     @DisplayName("Get User Adresses Successfully")
     void getUserAdresses() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .get("/address/registered")
+                .get("/adresses/me")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
     }
@@ -103,7 +103,7 @@ class AddressControllerTest {
                         "House Number", "Neighborhood Name",
                         "City Name", "State Name", user));
         mvc.perform(MockMvcRequestBuilders
-                .delete("/address/delete/{id}", address.getId())
+                .delete("/adresses/{id}", address.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
 
@@ -122,7 +122,7 @@ class AddressControllerTest {
         orderRepository.save(new Order(product, 5, product.getPrice() * 5, user));
 
         mvc.perform(MockMvcRequestBuilders
-                .delete("/address/delete/{id}", address.getId())
+                .delete("/adresses/{id}", address.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
 
@@ -144,7 +144,7 @@ class AddressControllerTest {
         purchaseRepository.save(new Purchase(Set.of(order), order.getPrice(), address, user));
 
         mvc.perform(MockMvcRequestBuilders
-                .delete("/address/delete/{id}", address.getId())
+                .delete("/adresses/{id}", address.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
 
@@ -162,7 +162,7 @@ class AddressControllerTest {
                         "House Number", "Neighborhood Name",
                         "City Name", "State Name", admin));
         mvc.perform(MockMvcRequestBuilders
-                .delete("/address/delete/{id}", address.getId())
+                .delete("/adresses/{id}", address.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isNotFound());
     }
@@ -171,8 +171,8 @@ class AddressControllerTest {
     void deleteAddress_unsuccessful_case02() throws Exception {
         var address = mock(Address.class);
         mvc.perform(MockMvcRequestBuilders
-                        .delete("/address/delete/{id}", address.getId())
-                        .header("Authorization", "Bearer " + authnService.generateToken(user)))
+                .delete("/adresses/{id}", address.getId())
+                .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isNotFound());
     }
 }

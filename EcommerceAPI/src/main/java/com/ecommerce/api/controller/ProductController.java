@@ -12,37 +12,37 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/products")
 public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<String> newProduct(@RequestBody @Valid ProductRequestDTO data) {
         productService.newProduct(data);
-        return ResponseEntity.ok("Registred");
+        return ResponseEntity.ok("Registered");
     }
-    @GetMapping("/registered")
+    @GetMapping
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
         var productResponseDTOList = productService.getAllProducts();
         return ResponseEntity.ok(productResponseDTOList);
     }
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable(name = "id") Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.ok("Deleted");
     }
-    @PostMapping("/favorite/{id}")
+    @PostMapping("/wishlist/{id}")
     public ResponseEntity<String> favorite(@PathVariable @Valid Long id) {
         productService.favorite(id);
         return ResponseEntity.ok("Favorited");
     }
-    @DeleteMapping("/unfavorite/{id}")
+    @DeleteMapping("/wishlist/{id}")
     public ResponseEntity<String> unfavorite(@PathVariable @Valid Long id) {
         productService.unfavorite(id);
         return ResponseEntity.ok("Unfavorited");
     }
-    @GetMapping("/wishlist")
+    @GetMapping("/me")
     public ResponseEntity<Set<ProductResponseDTO>> getUserWishlist() {
         var userWishlist = productService.getUserWishlist();
         return ResponseEntity.ok(userWishlist);

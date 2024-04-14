@@ -63,12 +63,14 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!--<dependency>
-            To make sure it will work, search for (http://localhost:8080/swagger-ui/index.html)
+        <!--
+        <dependency>
+            To make sure it will work, search for ("/swagger-ui/index.html")
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.4.0</version>
-        </dependency>-->
+        </dependency>
+        -->
     </dependencies>
 
     <build>
@@ -76,13 +78,20 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
+                    <mainClass>com.ecommerce.api.Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>

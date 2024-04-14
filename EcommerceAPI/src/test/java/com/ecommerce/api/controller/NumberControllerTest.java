@@ -63,7 +63,7 @@ class NumberControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                .post("/number/new")
+                .post("/numbers")
                 .header("Authorization", "Bearer " + authnService.generateToken(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -83,7 +83,7 @@ class NumberControllerTest {
                 """;
         numberRepository.save(new Number("11", "910000000", user));
         mvc.perform(MockMvcRequestBuilders
-                .post("/number/new")
+                .post("/numbers")
                 .header("Authorization", "Bearer " + authnService.generateToken(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -95,7 +95,7 @@ class NumberControllerTest {
     void deleteNumber_successful() throws Exception {
         numberRepository.save(new Number("11", "910000000", user));
         mvc.perform(MockMvcRequestBuilders
-                .delete("/number/delete")
+                .delete("/numbers")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
     }
@@ -103,7 +103,7 @@ class NumberControllerTest {
     @DisplayName("Delete Unsuccessfully - NonExistent")
     void deleteNumber_unsuccessful() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .delete("/number/delete")
+                .delete("/numbers")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isNotFound());
     }
@@ -119,7 +119,7 @@ class NumberControllerTest {
                 """;
         numberRepository.save(new Number("11", "910000000", user));
         mvc.perform(MockMvcRequestBuilders
-                .put("/number/update")
+                .put("/numbers")
                 .header("Authorization", "Bearer " + authnService.generateToken(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -135,10 +135,10 @@ class NumberControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                        .put("/number/update")
-                        .header("Authorization", "Bearer " + authnService.generateToken(user))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                .put("/numbers")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
                 .andExpect(status().isNotFound());
     }
 
@@ -147,7 +147,7 @@ class NumberControllerTest {
     void getUserNumber_successful() throws Exception {
         numberRepository.save(new Number("11", "910000000", user));
         mvc.perform(MockMvcRequestBuilders
-                .get("/number/registered")
+                .get("/numbers/me")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
     }
@@ -155,7 +155,7 @@ class NumberControllerTest {
     @DisplayName("Get User Number Unsuccessfully - NonExistent")
     void getUserNumber_unsuccessful() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .get("/number/registered")
+                .get("/number/me")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isNotFound());
     }

@@ -80,7 +80,7 @@ class UserControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                .post("/user/register")
+                .post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isOk());
@@ -98,7 +98,7 @@ class UserControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                .post("/user/register")
+                .post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isBadRequest());
@@ -120,7 +120,7 @@ class UserControllerTest {
                 "13441689810", "useremail@gmail.com",
                 encoder.encode("1234"), Role.USER));
         mvc.perform(MockMvcRequestBuilders
-                .post("/user/register")
+                .post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isInternalServerError());
@@ -138,7 +138,7 @@ class UserControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                .post("/user/register/admin")
+                .post("/users/admin")
                 .header("Authorization", "Bearer " + authnService.generateToken(admin))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -157,10 +157,10 @@ class UserControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                        .post("/user/register/admin")
-                        .header("Authorization", "Bearer " + authnService.generateToken(user))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                .post("/users/admin")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
                 .andExpect(status().isForbidden());
     }
 
@@ -178,7 +178,7 @@ class UserControllerTest {
                 "13441689810", "useremail@gmail.com",
                 encoder.encode("1234"), Role.USER));
         mvc.perform(MockMvcRequestBuilders
-                .post("/user/login")
+                .post("/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isOk());
@@ -193,7 +193,7 @@ class UserControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                .post("/user/login")
+                .post("/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isForbidden());
@@ -203,7 +203,7 @@ class UserControllerTest {
     @DisplayName("Get All Users Successfully")
     void getAllUsers_successful() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .get("/user/registered")
+                .get("/users")
                 .header("Authorization", "Bearer " + authnService.generateToken(admin)))
                 .andExpect(status().isOk());
     }
@@ -211,7 +211,7 @@ class UserControllerTest {
     @DisplayName("Get All Users Unsuccessfully")
     void getAllUsers_unsuccessful() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                        .get("/user/registered")
+                        .get("/users")
                         .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isForbidden());
     }
@@ -220,7 +220,7 @@ class UserControllerTest {
     @DisplayName("Delete Successfully")
     void deleteUser_successful_case01() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .delete("/user/delete/{username}", user.getUsername())
+                .delete("/users/{username}", user.getUsername())
                 .header("Authorization", "Bearer " + authnService.generateToken(admin)))
                 .andExpect(status().isOk());
     }
@@ -241,7 +241,7 @@ class UserControllerTest {
         orderRepository.save(new Order(product, 5, product.getPrice() * 5, user));
 
         mvc.perform(MockMvcRequestBuilders
-                .delete("/user/delete/{username}", user.getUsername())
+                .delete("/users/{username}", user.getUsername())
                 .header("Authorization", "Bearer " + authnService.generateToken(admin)))
                 .andExpect(status().isOk());
     }
@@ -264,8 +264,8 @@ class UserControllerTest {
         orderRepository.save(order);
         purchaseRepository.save(new Purchase(Set.of(order), order.getPrice(), address, user));
         mvc.perform(MockMvcRequestBuilders
-                        .delete("/user/delete/{username}", user.getUsername())
-                        .header("Authorization", "Bearer " + authnService.generateToken(admin)))
+                .delete("/users/{username}", user.getUsername())
+                .header("Authorization", "Bearer " + authnService.generateToken(admin)))
                 .andExpect(status().isOk());
     }
     @Test
@@ -273,15 +273,15 @@ class UserControllerTest {
     void deleteUser_unsuccessful_case01() throws Exception {
         var user = mock(User.class);
         mvc.perform(MockMvcRequestBuilders
-                        .delete("/user/delete/{username}", user.getUsername())
-                        .header("Authorization", "Bearer " + authnService.generateToken(admin)))
+                .delete("/users/{username}", user.getUsername())
+                .header("Authorization", "Bearer " + authnService.generateToken(admin)))
                 .andExpect(status().isNotFound());
     }
     @Test
     @DisplayName("Delete Unsuccessfully")
     void deleteUser_unsuccessful_case02() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .delete("/user/delete/{username}", user.getUsername())
+                .delete("/users/{username}", user.getUsername())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isForbidden());
     }

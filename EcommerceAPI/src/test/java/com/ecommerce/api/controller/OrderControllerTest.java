@@ -66,7 +66,7 @@ class OrderControllerTest {
                 """;
         productRepository.save(new Product("Iphone", "Apple smartphone.",5000D));
         mvc.perform(MockMvcRequestBuilders
-                .post("/order/new")
+                .post("/orders")
                 .header("Authorization", "Bearer " + authnService.generateToken(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -86,7 +86,7 @@ class OrderControllerTest {
                 """;
         productRepository.save(new Product("Iphone", "Apple smartphone.",5000D));
         mvc.perform(MockMvcRequestBuilders
-                .post("/order/new")
+                .post("/orders")
                 .header("Authorization", "Bearer " + authnService.generateToken(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -102,7 +102,7 @@ class OrderControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                .post("/order/new")
+                .post("/orders")
                 .header("Authorization", "Bearer " + authnService.generateToken(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -117,7 +117,7 @@ class OrderControllerTest {
         var order = orderRepository.save(
                 new Order(product, 5, product.getPrice() * 5, user));
         mvc.perform(MockMvcRequestBuilders
-                .delete("/order/delete/{id}", order.getId())
+                .delete("/orders/{id}", order.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
 
@@ -129,8 +129,8 @@ class OrderControllerTest {
     void deleteFromCart_unsuccessful() throws Exception {
         var order = mock(Order.class);
         mvc.perform(MockMvcRequestBuilders
-                        .delete("/order/delete/{id}", order.getId())
-                        .header("Authorization", "Bearer " + authnService.generateToken(user)))
+                .delete("/orders/{id}", order.getId())
+                .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isNotFound());
     }
 
@@ -138,7 +138,7 @@ class OrderControllerTest {
     @DisplayName("Get User Cart Successfully")
     void getUserCart() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .get("/order/cart")
+                .get("/orders/me")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
     }

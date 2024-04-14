@@ -11,22 +11,22 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/orders")
 public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<String> addToCart(@RequestBody @Valid OrderRequestDTO data) {
         orderService.addToCart(data);
         return ResponseEntity.ok("Added");
     }
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteFromCart(@PathVariable("id") @Valid Long id) {
         orderService.deleteFromCart(id);
         return ResponseEntity.ok("Deleted");
     }
-    @GetMapping("/cart")
+    @GetMapping("/me")
     public ResponseEntity<Set<OrderResponseDTO>> getUserCart() {
         var orderResponseDTOSet = orderService.getUserCart();
         return ResponseEntity.ok(orderResponseDTOSet);

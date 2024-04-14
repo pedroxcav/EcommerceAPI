@@ -77,7 +77,7 @@ class ProductControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                .post("/product/new")
+                .post("/products")
                 .header("Authorization", "Bearer " + authnService.generateToken(admin))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -94,7 +94,7 @@ class ProductControllerTest {
                     }
                 """;
         mvc.perform(MockMvcRequestBuilders
-                .post("/product/new")
+                .post("/products")
                 .header("Authorization", "Bearer " + authnService.generateToken(user))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
@@ -105,7 +105,7 @@ class ProductControllerTest {
     @DisplayName("Get ALl Products Successfully")
     void getAllProducts() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .get("/product/registered")
+                .get("/products")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
     }
@@ -116,7 +116,7 @@ class ProductControllerTest {
         var product = productRepository.save(
                 new Product("Iphone", "Smartphone apple.", 5000D));
         mvc.perform(MockMvcRequestBuilders
-                .delete("/product/delete/{id}", product.getId())
+                .delete("/products/{id}", product.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(admin)))
                 .andExpect(status().isOk());
     }
@@ -135,8 +135,8 @@ class ProductControllerTest {
         purchaseRepository.save(new Purchase(Set.of(order), order.getPrice(), address, user));
 
         mvc.perform(MockMvcRequestBuilders
-                        .delete("/product/delete/{id}", product.getId())
-                        .header("Authorization", "Bearer " + authnService.generateToken(admin)))
+                .delete("/products/{id}", product.getId())
+                .header("Authorization", "Bearer " + authnService.generateToken(admin)))
                 .andExpect(status().isOk());
 
         Optional<User> optionalUser = userRepository.loadByUsername(user.getUsername());
@@ -150,8 +150,8 @@ class ProductControllerTest {
     void deleteProduct_unsuccessful_case01() throws Exception {
         var product = mock(Product.class);
         mvc.perform(MockMvcRequestBuilders
-                        .delete("/product/delete/{id}", product.getId())
-                        .header("Authorization", "Bearer " + authnService.generateToken(user)))
+                .delete("/products/{id}", product.getId())
+                .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isForbidden());
     }
     @Test
@@ -159,8 +159,8 @@ class ProductControllerTest {
     void deleteProduct_unsuccessful_case02() throws Exception {
         var product = mock(Product.class);
         mvc.perform(MockMvcRequestBuilders
-                        .delete("/product/delete/{id}", product.getId())
-                        .header("Authorization", "Bearer " + authnService.generateToken(admin)))
+                .delete("/products/{id}", product.getId())
+                .header("Authorization", "Bearer " + authnService.generateToken(admin)))
                 .andExpect(status().isNotFound());
     }
 
@@ -170,7 +170,7 @@ class ProductControllerTest {
         var product = productRepository.save(
                 new Product("Iphone", "Apple smartphone.", 5000D));
         mvc.perform(MockMvcRequestBuilders
-                .post("/product/favorite/{id}", product.getId())
+                .post("/products/wishlist/{id}", product.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
 
@@ -190,7 +190,7 @@ class ProductControllerTest {
         productRepository.save(product);
 
         mvc.perform(MockMvcRequestBuilders
-                .post("/product/favorite/{id}", product.getId())
+                .post("/products/wishlist/{id}", product.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isInternalServerError());
     }
@@ -199,7 +199,7 @@ class ProductControllerTest {
     void favorite_unsuccessful_case02() throws Exception {
         var product = mock(Product.class);
         mvc.perform(MockMvcRequestBuilders
-                .post("/product/favorite/{id}", product.getId())
+                .post("/products/wishlist/{id}", product.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isNotFound());
     }
@@ -216,7 +216,7 @@ class ProductControllerTest {
         productRepository.save(product);
 
         mvc.perform(MockMvcRequestBuilders
-                .delete("/product/unfavorite/{id}", product.getId())
+                .delete("/products/wishlist/{id}", product.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
 
@@ -230,8 +230,8 @@ class ProductControllerTest {
         var product = productRepository.save(
                 new Product("Iphone", "Apple smartphone.", 5000D));
         mvc.perform(MockMvcRequestBuilders
-                        .delete("/product/unfavorite/{id}", product.getId())
-                        .header("Authorization", "Bearer " + authnService.generateToken(user)))
+                .delete("/products/wishlist/{id}", product.getId())
+                .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isInternalServerError());
     }
     @Test
@@ -239,8 +239,8 @@ class ProductControllerTest {
     void unfavorite_unsuccessful_case02() throws Exception {
         var product = mock(Product.class);
         mvc.perform(MockMvcRequestBuilders
-                        .delete("/product/unfavorite/{id}", product.getId())
-                        .header("Authorization", "Bearer " + authnService.generateToken(user)))
+                .delete("/products/wishlist/{id}", product.getId())
+                .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isNotFound());
     }
 
@@ -248,7 +248,7 @@ class ProductControllerTest {
     @DisplayName("Get User Wishlist Successfully")
     void getUserWishlist() throws Exception {
         mvc.perform(MockMvcRequestBuilders
-                .get("/product/wishlist")
+                .get("/products/me")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
     }

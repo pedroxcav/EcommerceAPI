@@ -8,27 +8,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/number")
+@RequestMapping("/numbers")
 public class NumberController {
     @Autowired
     private NumberService numberService;
 
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<String> newNumber(@RequestBody @Valid NumberDTO data) {
         numberService.newNumber(data);
         return ResponseEntity.ok("Saved");
     }
-    @DeleteMapping("/delete")
+    @DeleteMapping
     public ResponseEntity<String> deleteNumber() {
         numberService.deleteNumber();
         return ResponseEntity.ok("Deleted");
     }
-    @PutMapping("/update")
+    @PutMapping
     public ResponseEntity<String> updateNumber(@RequestBody @Valid NumberDTO data) {
         numberService.updateNumber(data);
         return ResponseEntity.ok("Updated");
     }
-    @GetMapping("/registered")
+    @GetMapping("/me")
     public ResponseEntity<NumberDTO> getUserNumber() {
         var numberDTO = numberService.getUserNumber();
         return ResponseEntity.ok(numberDTO);
