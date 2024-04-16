@@ -7,14 +7,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     UserDetails findByUsername(String username);
+    Set<User> findAllByUsernameOrEmail(String username, String email);
+    boolean existsByUsernameOrCPFOrEmail(String username, String CPF, String email);
 
     @Query(value = "SELECT u FROM User u WHERE u.username = :username")
     Optional<User> loadByUsername(String username);
-
-    boolean existsByUsernameOrCPF(String username, String CPF);
 }

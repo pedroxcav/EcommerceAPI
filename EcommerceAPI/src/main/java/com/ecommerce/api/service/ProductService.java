@@ -1,12 +1,14 @@
 package com.ecommerce.api.service;
 
+import com.ecommerce.api.exception.InvalidPriceException;
 import com.ecommerce.api.exception.NullProductException;
 import com.ecommerce.api.exception.WishlistProductException;
 import com.ecommerce.api.model.Order;
 import com.ecommerce.api.model.Product;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.product.ProductRequestDTO;
-import com.ecommerce.api.model.dto.product.ProductResponseDTO;
+import com.ecommerce.api.model.dto.product.ProductDTO;
+import com.ecommerce.api.model.dto.product.ProductUpdateDTO;
 import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -20,15 +22,16 @@ import java.util.stream.Collectors;
 public class ProductService {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
-    private final UserService userService;
+    private final AuthnService authnService;
 
-    public ProductService(ProductRepository productRepository, OrderRepository orderRepository, UserService userService) {
+    public ProductService(ProductRepository productRepository, OrderRepository orderRepository, AuthnService authnService) {
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
-        this.userService = userService;
+        this.authnService = authnService;
     }
 
     public void newProduct(ProductRequestDTO data) {
+        if(data.price() <= 0) throw new InvalidPriceException();
         var product = new Product(data.name(), data.description(), data.price());
         productRepository.save(product);
     }
@@ -53,12 +56,12 @@ public class ProductService {
         } else
             throw new NullProductException();
     }
-    public List<ProductResponseDTO> getAllProducts() {
+    public List<ProductDTO> getAllProducts() {
         List<Product> productList = productRepository.findAll();
         return productList
                 .stream()
                 .filter(Product::isActive)
-                .map(product -> new ProductResponseDTO(
+                .map(product -> new ProductDTO(
                         product.getId(),
                         product.getName(),
                         product.getDescription(),
@@ -66,7 +69,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
     public void favorite(Long id) {
-        Optional<User> optionalUser = userService.getAuthnUser();
+        Optional<User> optionalUser = authnService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             Optional<Product> optionalProduct = productRepository.findById(id);
             if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
@@ -84,7 +87,7 @@ public class ProductService {
         });
     }
     public void unfavorite(Long id) {
-        Optional<User> optionalUser = userService.getAuthnUser();
+        Optional<User> optionalUser = authnService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             Optional<Product> optionalProduct = productRepository.findById(id);
             if(optionalProduct.isPresent() && optionalProduct.get().isActive()) {
@@ -101,12 +104,12 @@ public class ProductService {
                 throw new NullProductException();
         });
     }
-    public Set<ProductResponseDTO> getUserWishlist() {
-        Optional<User> optionalUser = userService.getAuthnUser();
+    public Set<ProductDTO> getUserWishlist() {
+        Optional<User> optionalUser = authnService.getAuthnUser();
         if(optionalUser.isPresent()) {
             User user = optionalUser.get();
             return user.getWishlist().stream()
-                    .map(product -> new ProductResponseDTO(
+                    .map(product -> new ProductDTO(
                             product.getId(),
                             product.getName(),
                             product.getDescription(),
@@ -114,5 +117,16 @@ public class ProductService {
                     )).collect(Collectors.toSet());
         } else
             return null;
+    }
+    public void updateProduct(ProductUpdateDTO data) {
+        if (data.price() <= 0) throw new InvalidPriceException();
+        Optional<Product> optionalProduct = productRepository.findById(data.id());
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            product.setDescription(data.description());
+            product.setPrice(data.price());
+            productRepository.save(product);
+        } else
+            throw new NullProductException();
     }
 }

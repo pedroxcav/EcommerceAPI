@@ -5,7 +5,8 @@ import com.ecommerce.api.exception.NullOrderException;
 import com.ecommerce.api.exception.NullProductException;
 import com.ecommerce.api.model.*;
 import com.ecommerce.api.model.dto.order.OrderRequestDTO;
-import com.ecommerce.api.model.dto.order.OrderResponseDTO;
+import com.ecommerce.api.model.dto.order.OrderDTO;
+import com.ecommerce.api.model.dto.order.OrderUpdateDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.ProductRepository;
@@ -27,7 +28,7 @@ class OrderServiceTest {
     @Mock
     private ProductRepository productRepository;
     @Mock
-    private UserService userService;
+    private AuthnService authnService;
     @InjectMocks
     private OrderService orderService;
 
@@ -51,7 +52,7 @@ class OrderServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         OrderRequestDTO data = new OrderRequestDTO(2, product.getId());
@@ -59,7 +60,7 @@ class OrderServiceTest {
 
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(productRepository, times(1)).findById(product.getId());
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
     }
     @Test
     @DisplayName("Add Unsuccessfully - Invalid Amount")
@@ -76,14 +77,14 @@ class OrderServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
         OrderRequestDTO data = new OrderRequestDTO(-2, product.getId());
         Assertions.assertThrows(InvalidAmountException.class, () -> orderService.addToCart(data));
 
         verify(orderRepository, never()).save(any(Order.class));
         verify(productRepository, never()).findById(product.getId());
-        verify(userService, never()).getAuthnUser();
+        verify(authnService, never()).getAuthnUser();
     }
     @Test
     @DisplayName("Add Unsuccessfully - NonExistent Product")
@@ -94,14 +95,14 @@ class OrderServiceTest {
         product.setId(1L);
 
         when(productRepository.findById(product.getId())).thenReturn(Optional.empty());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
 
         OrderRequestDTO data = new OrderRequestDTO(2, product.getId());
         Assertions.assertThrows(NullProductException.class, () -> orderService.addToCart(data));
 
         verify(orderRepository, never()).save(any(Order.class));
         verify(productRepository, times(1)).findById(product.getId());
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
     }
 
     @Test
@@ -122,12 +123,12 @@ class OrderServiceTest {
         user.setCart(List.of(order));
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
         Assertions.assertDoesNotThrow(() -> orderService.deleteFromCart(order.getId()));
         verify(orderRepository, times(1)).delete(any(Order.class));
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
     }
     @Test
     @DisplayName("Delete Unsuccessfully - NonExistent Order")
@@ -141,11 +142,11 @@ class OrderServiceTest {
         order.setId(1L);
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
 
         Assertions.assertThrows(NullOrderException.class, () -> orderService.deleteFromCart(order.getId()));
         verify(orderRepository, never()).delete(any(Order.class));
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
     }
 
     @Test
@@ -168,10 +169,121 @@ class OrderServiceTest {
         user.setCart(List.of(firstOrder, secondOrder));
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
-        Set<OrderResponseDTO> orderResponseDTOSet = orderService.getUserCart();
-        Assertions.assertEquals(user.getCart().size(), orderResponseDTOSet.size());
-        verify(userService, times(1)).getAuthnUser();
+        Set<OrderDTO> orderDTOSet = orderService.getUserCart();
+        Assertions.assertEquals(user.getCart().size(), orderDTOSet.size());
+        verify(authnService, times(1)).getAuthnUser();
+    }
+
+    @Test
+    @DisplayName("Updates Successfully")
+    void updateOrder_successful() {
+        var firstProduct = new Product("Iphone", "Apple Smartphone.",5000D);
+        firstProduct.setOrders(new HashSet<>());
+        firstProduct.setUsers(new HashSet<>());
+        firstProduct.setId(1L);
+        var secondProduct = new Product("Iphone", "Apple Smartphone.",2500D);
+        secondProduct.setOrders(new HashSet<>());
+        secondProduct.setUsers(new HashSet<>());
+        secondProduct.setId(2L);
+        var order = new Order(firstProduct, 2, 10000D, mock(User.class));
+        order.setId(1L);
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(List.of(order));
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(productRepository.findById(secondProduct.getId())).thenReturn(Optional.of(secondProduct));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        var data = new OrderUpdateDTO(order.getId(), 3, secondProduct.getId());
+        Assertions.assertDoesNotThrow(() -> orderService.updateOrder(data));
+
+        verify(authnService, times(1)).getAuthnUser();
+        verify(orderRepository, times(1)).save(any(Order.class));
+    }
+    @Test
+    @DisplayName("Updates Unsuccessfully - NonExistent Product")
+    void updateOrder_unsuccessful_case01() {
+        var firstProduct = new Product("Iphone", "Apple Smartphone.",5000D);
+        firstProduct.setOrders(new HashSet<>());
+        firstProduct.setUsers(new HashSet<>());
+        firstProduct.setId(1L);
+        var order = new Order(firstProduct, 2, 10000D, mock(User.class));
+        order.setId(1L);
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(List.of(order));
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(productRepository.findById(any())).thenReturn(Optional.empty());
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        var data = new OrderUpdateDTO(order.getId(), 3, 2L);
+        Assertions.assertThrows(NullProductException.class, () -> orderService.updateOrder(data));
+
+        verify(authnService, times(1)).getAuthnUser();
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+    @Test
+    @DisplayName("Updates Unsuccessfully - NonExistent Order")
+    void updateOrder_unsuccessful_case02() {
+        var secondProduct = new Product("Iphone", "Apple Smartphone.",2500D);
+        secondProduct.setOrders(new HashSet<>());
+        secondProduct.setUsers(new HashSet<>());
+        secondProduct.setId(2L);
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(productRepository.findById(secondProduct.getId())).thenReturn(Optional.of(secondProduct));
+        when(orderRepository.findById(any())).thenReturn(Optional.empty());
+
+        var data = new OrderUpdateDTO(1L, 3, secondProduct.getId());
+        Assertions.assertThrows(NullOrderException.class, () -> orderService.updateOrder(data));
+
+        verify(authnService, times(1)).getAuthnUser();
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+    @Test
+    @DisplayName("Updates Unsuccessfully - Invalid Amount")
+    void updateOrder_unsuccessful_case03() {
+        var firstProduct = new Product("Iphone", "Apple Smartphone.",5000D);
+        firstProduct.setOrders(new HashSet<>());
+        firstProduct.setUsers(new HashSet<>());
+        firstProduct.setId(1L);
+        var secondProduct = new Product("Iphone", "Apple Smartphone.",2500D);
+        secondProduct.setOrders(new HashSet<>());
+        secondProduct.setUsers(new HashSet<>());
+        secondProduct.setId(2L);
+        var order = new Order(firstProduct, 2, 10000D, mock(User.class));
+        order.setId(1L);
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
+                "1234", Role.ADMIN);
+        user.setAdresses(new HashSet<>());
+        user.setCart(List.of(order));
+        user.setWishlist(new HashSet<>());
+        user.setPurchases(new ArrayList<>());
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(productRepository.findById(secondProduct.getId())).thenReturn(Optional.of(secondProduct));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        var data = new OrderUpdateDTO(order.getId(), -3, secondProduct.getId());
+        Assertions.assertThrows(InvalidAmountException.class, () -> orderService.updateOrder(data));
+
+        verify(authnService, times(1)).getAuthnUser();
+        verify(orderRepository, never()).save(any(Order.class));
     }
 }

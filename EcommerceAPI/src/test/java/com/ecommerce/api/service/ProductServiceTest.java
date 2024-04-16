@@ -1,10 +1,12 @@
 package com.ecommerce.api.service;
 
+import com.ecommerce.api.exception.InvalidPriceException;
 import com.ecommerce.api.exception.NullProductException;
 import com.ecommerce.api.exception.WishlistProductException;
 import com.ecommerce.api.model.*;
 import com.ecommerce.api.model.dto.product.ProductRequestDTO;
-import com.ecommerce.api.model.dto.product.ProductResponseDTO;
+import com.ecommerce.api.model.dto.product.ProductDTO;
+import com.ecommerce.api.model.dto.product.ProductUpdateDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.ProductRepository;
@@ -26,7 +28,7 @@ class ProductServiceTest {
     @Mock
     private OrderRepository orderRepository;
     @Mock
-    private UserService userService;
+    private AuthnService authnService;
     @InjectMocks
     private ProductService productService;
 
@@ -37,12 +39,21 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("Register Successfully")
-    void newProduct() {
+    void newProduct_successful() {
         var data = new ProductRequestDTO("Iphone", "Apple smartphone.", 5000D);
 
-        productService.newProduct(data);
+        Assertions.assertDoesNotThrow(() -> productService.newProduct(data));
 
         verify(productRepository, times(1)).save(any(Product.class));
+    }
+    @Test
+    @DisplayName("Register Unsuccessfully")
+    void newProduct_unsuccessful() {
+        var data = new ProductRequestDTO("Iphone", "Apple smartphone.", -5000D);
+
+        Assertions.assertThrows(InvalidPriceException.class, () -> productService.newProduct(data));
+
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
@@ -77,9 +88,9 @@ class ProductServiceTest {
         var secondProduct = new Product("Iphone", "Apple smartphone.", 5000D);
         when(productRepository.findAll()).thenReturn(List.of(firstProduct, secondProduct));
 
-        List<ProductResponseDTO> productResponseDTOList = productService.getAllProducts();
+        List<ProductDTO> productDTOList = productService.getAllProducts();
 
-        Assertions.assertEquals(2, productResponseDTOList.size());
+        Assertions.assertEquals(2, productDTOList.size());
         verify(productRepository, times(1)).findAll();
     }
 
@@ -97,7 +108,7 @@ class ProductServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         Assertions.assertDoesNotThrow(() -> productService.favorite(product.getId()));
@@ -120,7 +131,7 @@ class ProductServiceTest {
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
         user.getWishlist().add(product);
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         Assertions.assertThrows(WishlistProductException.class, () -> productService.favorite(product.getId()));
@@ -130,7 +141,7 @@ class ProductServiceTest {
     @DisplayName("Favorite Unsuccessfully - NonExistent")
     void favorite_unsuccessful_case02() {
         when(productRepository.findById(1L)).thenReturn(Optional.empty());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
 
         Assertions.assertThrows(NullProductException.class, () -> productService.favorite(1L));
 
@@ -152,7 +163,7 @@ class ProductServiceTest {
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
         user.getWishlist().add(product);
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         productService.unfavorite(product.getId());
@@ -174,7 +185,7 @@ class ProductServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         Assertions.assertThrows(WishlistProductException.class, () -> productService.unfavorite(product.getId()));
@@ -185,7 +196,7 @@ class ProductServiceTest {
     @DisplayName("Unfavorite Unsuccessfully - NonExistent")
     void unfavorite_unsuccessful_case02() {
         when(productRepository.findById(1L)).thenReturn(Optional.empty());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
 
         Assertions.assertThrows(NullProductException.class, () -> productService.unfavorite(1L));
 
@@ -206,11 +217,50 @@ class ProductServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(Set.of(firstProduct, secondProduct));
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
-        Set<ProductResponseDTO> productResponseDTOSet = productService.getUserWishlist();
+        Set<ProductDTO> productDTOSet = productService.getUserWishlist();
 
-        Assertions.assertEquals(user.getWishlist().size(), productResponseDTOSet.size());
-        verify(userService, times(1)).getAuthnUser();
+        Assertions.assertEquals(user.getWishlist().size(), productDTOSet.size());
+        verify(authnService, times(1)).getAuthnUser();
+    }
+
+    @Test
+    @DisplayName("Update Successfully")
+    void updateProduct_successful() {
+        Product product = new Product("Iphone", "Apple smartphone.", 5000D);
+        product.setOrders(new HashSet<>());
+        product.setUsers(new HashSet<>());
+        product.setId(1L);
+        when(productRepository.findById(any(Long.class))).thenReturn(Optional.of(product));
+
+        var data = new ProductUpdateDTO(product.getId(), "New Description", 2500D);
+        Assertions.assertDoesNotThrow(() -> productService.updateProduct(data));
+        verify(productRepository, times(1)).findById(any(Long.class));
+        verify(productRepository, times(1)).save(any(Product.class));
+    }
+    @Test
+    @DisplayName("Update Unsuccessfully - NonExistent")
+    void updateProduct_unsuccessful_case01() {
+        when(productRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        var data = new ProductUpdateDTO(1L, "New Description", 2500D);
+        Assertions.assertThrows(NullProductException.class, () -> productService.updateProduct(data));
+        verify(productRepository, times(1)).findById(any(Long.class));
+        verify(productRepository, never()).save(any(Product.class));
+    }
+    @Test
+    @DisplayName("Update Unsuccessfully - Invalid Price")
+    void updateProduct_unsuccessful_case02() {
+        Product product = new Product("Iphone", "Apple smartphone.", 5000D);
+        product.setOrders(new HashSet<>());
+        product.setUsers(new HashSet<>());
+        product.setId(1L);
+        when(productRepository.findById(any(Long.class))).thenReturn(Optional.of(product));
+
+        var data = new ProductUpdateDTO(product.getId(), "New Description", -2500D);
+        Assertions.assertThrows(InvalidPriceException.class, () -> productService.updateProduct(data));
+        verify(productRepository, never()).findById(any(Long.class));
+        verify(productRepository, never()).save(any(Product.class));
     }
 }

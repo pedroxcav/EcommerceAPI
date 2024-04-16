@@ -1,7 +1,7 @@
 package com.ecommerce.api.controller;
 
 import com.ecommerce.api.model.dto.purchase.PurchaseRequestDTO;
-import com.ecommerce.api.model.dto.purchase.PurchaseResponseDTO;
+import com.ecommerce.api.model.dto.purchase.PurchaseDTO;
 import com.ecommerce.api.service.PurchaseService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +22,12 @@ public class PurchaseController {
         return ResponseEntity.ok("Bought");
     }
     @GetMapping("/me")
-    public ResponseEntity<Set<PurchaseResponseDTO>> getUserPurchases() {
+    public ResponseEntity<Set<PurchaseDTO>> getUserPurchases() {
         var userPurchases = purchaseService.getUserPurchases();
         return ResponseEntity.ok(userPurchases);
     }
     @GetMapping
-    public ResponseEntity<Set<PurchaseResponseDTO>> getAllPurchases() {
+    public ResponseEntity<Set<PurchaseDTO>> getAllPurchases() {
         var purchaseSet = purchaseService.getAllPurchases();
         return ResponseEntity.ok(purchaseSet);
     }

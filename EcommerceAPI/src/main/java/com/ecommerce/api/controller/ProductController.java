@@ -1,7 +1,8 @@
 package com.ecommerce.api.controller;
 
 import com.ecommerce.api.model.dto.product.ProductRequestDTO;
-import com.ecommerce.api.model.dto.product.ProductResponseDTO;
+import com.ecommerce.api.model.dto.product.ProductDTO;
+import com.ecommerce.api.model.dto.product.ProductUpdateDTO;
 import com.ecommerce.api.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class ProductController {
         return ResponseEntity.ok("Registered");
     }
     @GetMapping
-    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
         var productResponseDTOList = productService.getAllProducts();
         return ResponseEntity.ok(productResponseDTOList);
     }
@@ -43,8 +44,13 @@ public class ProductController {
         return ResponseEntity.ok("Unfavorited");
     }
     @GetMapping("/me")
-    public ResponseEntity<Set<ProductResponseDTO>> getUserWishlist() {
+    public ResponseEntity<Set<ProductDTO>> getUserWishlist() {
         var userWishlist = productService.getUserWishlist();
         return ResponseEntity.ok(userWishlist);
+    }
+    @PutMapping
+    public ResponseEntity<String> updateProduct(@RequestBody @Valid ProductUpdateDTO data) {
+        productService.updateProduct(data);
+        return ResponseEntity.ok("Updated");
     }
 }

@@ -6,7 +6,8 @@ import com.ecommerce.api.exception.UserRegisteredException;
 import com.ecommerce.api.model.*;
 import com.ecommerce.api.model.dto.user.AuthenticationDTO;
 import com.ecommerce.api.model.dto.user.RegistrationDTO;
-import com.ecommerce.api.model.dto.user.UserResponseDTO;
+import com.ecommerce.api.model.dto.user.UpdateDTO;
+import com.ecommerce.api.model.dto.user.UserDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.AddressRepository;
 import com.ecommerce.api.repository.OrderRepository;
@@ -21,9 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
@@ -65,7 +63,7 @@ class UserServiceTest {
         var role = Role.ADMIN;
 
         when(validator.validate(data.CPF())).thenReturn(true);
-        when(userRepository.existsByUsernameOrCPF(data.username(), data.CPF())).thenReturn(false);
+        when(userRepository.existsByUsernameOrCPFOrEmail(data.username(), data.CPF(), data.email())).thenReturn(false);
 
         userService.register(data, role);
 
@@ -99,7 +97,7 @@ class UserServiceTest {
         var role = Role.ADMIN;
 
         when(validator.validate(data.CPF())).thenReturn(true);
-        when(userRepository.existsByUsernameOrCPF(data.username(), data.CPF())).thenReturn(true);
+        when(userRepository.existsByUsernameOrCPFOrEmail(data.username(), data.CPF(), data.email())).thenReturn(true);
 
         Assertions.assertThrows(UserRegisteredException.class, () -> userService.register(data, role));
     }
@@ -141,28 +139,10 @@ class UserServiceTest {
         secondUser.setPurchases(new ArrayList<>());
         when(userRepository.findAll()).thenReturn(Arrays.asList(firstUser, secondUser));
 
-        List<UserResponseDTO> userResponseDTOList = userService.getAllUsers();
+        List<UserDTO> userDTOList = userService.getAllUsers();
 
-        Assertions.assertEquals(2, userResponseDTOList.size());
+        Assertions.assertEquals(2, userDTOList.size());
         verify(userRepository, times(1)).findAll();
-    }
-
-    @Test
-    @DisplayName("Get Authenticated User Successfully")
-    void getAuthUser() {
-        User user = new User();
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Authentication authentication = mock(Authentication.class);
-        UserDetails userDetails = mock(UserDetails.class);
-        String username = "admin";
-        when(userDetails.getUsername()).thenReturn(username);
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-        when(userRepository.loadByUsername(username)).thenReturn(Optional.of(user));
-
-        Optional<User> actualUser = userService.getAuthnUser();
-        Assertions.assertEquals(Optional.of(user), actualUser);
     }
 
     @Test
@@ -175,9 +155,6 @@ class UserServiceTest {
         user.setCart(new ArrayList<>());
         user.setAdresses(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-
-        var mockedHashset = mock(HashSet.class);
-        var mockedPurchase = mock(Purchase.class);
         when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
 
         Assertions.assertDoesNotThrow(() -> userService.deleteUser(user.getUsername()));
@@ -185,8 +162,6 @@ class UserServiceTest {
         verify(userRepository, atLeastOnce()).delete(any(User.class));
         verify(addressRepository, never()).delete(any(Address.class));
         verify(orderRepository, never()).delete(any(Order.class));
-        verify(mockedHashset, never()).remove(any(User.class));
-        verify(mockedPurchase, never()).setUser(null);
     }
     @Test
     @DisplayName("Delete Unsuccessfully - NonExistent")
@@ -194,5 +169,39 @@ class UserServiceTest {
         when(userRepository.findByUsername(any(String.class))).thenReturn(null);
 
         Assertions.assertThrows(NullUserException.class, () -> userService.deleteUser(any(String.class)));
+    }
+
+    @Test
+    @DisplayName("Update Successfully")
+    void updateUser_successful() {
+        var user = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
+                "1234", Role.ADMIN);
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(userRepository.findAllByUsernameOrEmail(any(), any())).thenReturn(new HashSet<>());
+
+        var data = new UpdateDTO(
+                "New Name", "New Username",
+                "New Email", "New Password");
+        Assertions.assertDoesNotThrow(() -> userService.updateUser(data));
+    }
+    @Test
+    @DisplayName("Update Unsuccessfully")
+    void updateUser_unsuccessful() {
+        var firstUser = new User("User", "user",
+                "17719960807", "user@gmail.com",
+                "1234", Role.USER);
+        firstUser.setId(UUID.randomUUID());
+        var secondUser = new User("Admin", "admin",
+                "24512127801", "admin@gmail.com",
+                "1234", Role.ADMIN);
+        secondUser.setId(UUID.randomUUID());
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(firstUser));
+        when(userRepository.findAllByUsernameOrEmail(any(), any())).thenReturn(Set.of(secondUser));
+
+        var data = new UpdateDTO(
+                "New Name", "admin",
+                "admin@gmail.com", "New Password");
+        Assertions.assertThrows(UserRegisteredException.class, () -> userService.updateUser(data));
     }
 }

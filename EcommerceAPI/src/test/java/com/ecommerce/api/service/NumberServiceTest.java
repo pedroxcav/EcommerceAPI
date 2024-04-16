@@ -23,7 +23,7 @@ class NumberServiceTest {
     @Mock
     private NumberRepository numberRepository;
     @Mock
-    private UserService userService;
+    private AuthnService authnService;
     @InjectMocks
     private NumberService numberService;
 
@@ -42,11 +42,11 @@ class NumberServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
         numberService.newNumber(new NumberDTO("11", "910000000"));
         verify(numberRepository, times(1)).save(any(Number.class));
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
     }
     @Test
     @DisplayName("Number Already Registered")
@@ -59,10 +59,10 @@ class NumberServiceTest {
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
         user.setNumber(new Number("11","910000000", user));
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
         Assertions.assertThrows(NumberRegisteredException.class, () -> numberService.newNumber(new NumberDTO("11","910000000")));
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
         verify(numberRepository, never()).save(any(Number.class));
     }
 
@@ -77,10 +77,10 @@ class NumberServiceTest {
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
         user.setNumber(new Number("11","910000000", user));
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
         Assertions.assertDoesNotThrow(() -> numberService.deleteNumber());
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
         verify(numberRepository, times(1)).delete(any(Number.class));
     }
     @Test
@@ -93,10 +93,10 @@ class NumberServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
         Assertions.assertThrows(NullNumberException.class, () -> numberService.deleteNumber());
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
         verify(numberRepository, never()).delete(any(Number.class));
     }
 
@@ -111,11 +111,11 @@ class NumberServiceTest {
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
         user.setNumber(new Number("11","910000000", user));
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
         Assertions.assertDoesNotThrow(() -> numberService.updateNumber(new NumberDTO("11","910000000")));
         verify(numberRepository, times(1)).save(any(Number.class));
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
     }
     @Test
     @DisplayName("Update Unsuccessfully - NonExistent")
@@ -127,12 +127,12 @@ class NumberServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
         Assertions.assertThrows(
                 NullNumberException.class,
                 () -> numberService.updateNumber(new NumberDTO("11","910000000")));
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
         verify(numberRepository, never()).save(any(Number.class));
     }
 
@@ -147,12 +147,12 @@ class NumberServiceTest {
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
         user.setNumber(new Number("11","910000000", user));
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
         NumberDTO userNumber = numberService.getUserNumber();
         Assertions.assertEquals(user.getNumber().getAreaCode(), userNumber.areaCode());
         Assertions.assertEquals(user.getNumber().getNumber(), userNumber.number());
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
     }
     @Test
     @DisplayName("Get User Number Unsuccessfully - NonExistent")
@@ -164,9 +164,9 @@ class NumberServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
         Assertions.assertThrows(NullNumberException.class, () -> numberService.getUserNumber());
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
     }
 }

@@ -13,15 +13,15 @@ import java.util.Optional;
 @Service
 public class NumberService {
     private final NumberRepository numberRepository;
-    private final UserService userService;
+    private final AuthnService authnService;
 
-    public NumberService(NumberRepository numberRepository, UserService userService) {
+    public NumberService(NumberRepository numberRepository, AuthnService authnService) {
         this.numberRepository = numberRepository;
-        this.userService = userService;
+        this.authnService = authnService;
     }
 
     public void newNumber(NumberDTO data) {
-        Optional<User> optionalUser = userService.getAuthnUser();
+        Optional<User> optionalUser = authnService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             if(user.getNumber() != null)
                 throw new NumberRegisteredException();
@@ -33,7 +33,7 @@ public class NumberService {
         });
     }
     public void deleteNumber() {
-        Optional<User> optionalUser = userService.getAuthnUser();
+        Optional<User> optionalUser = authnService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             var number = user.getNumber();
             if(number != null)
@@ -43,7 +43,7 @@ public class NumberService {
         });
     }
     public void updateNumber(NumberDTO data) {
-        Optional<User> optionalUser = userService.getAuthnUser();
+        Optional<User> optionalUser = authnService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             var number = user.getNumber();
             if(number != null) {
@@ -55,7 +55,7 @@ public class NumberService {
         });
     }
     public NumberDTO getUserNumber() {
-        Optional<User> optionalUser = userService.getAuthnUser();
+        Optional<User> optionalUser = authnService.getAuthnUser();
         if(optionalUser.isPresent()) {
             User user = optionalUser.get();
             var number = user.getNumber();

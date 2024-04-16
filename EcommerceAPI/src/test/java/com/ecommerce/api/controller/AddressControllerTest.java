@@ -22,7 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -173,6 +173,76 @@ class AddressControllerTest {
         mvc.perform(MockMvcRequestBuilders
                 .delete("/adresses/{id}", address.getId())
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Update Successfully")
+    void updateAddress_successful() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "zipCode": "08500000",
+                        "number": "House Number",
+                        "street": "Street Name",
+                        "neighborhood": "Neighborhood Name",
+                        "city": "City Name",
+                        "state": "State Name"
+                    }
+                """;
+        addressRepository.save(new Address("08500000", "Street Name",
+                "House Number", "Neighborhood Name",
+                "City Name", "State Name", user));
+        mvc.perform(MockMvcRequestBuilders
+                .put("/adresses")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isOk());
+    }
+    @Test
+    @DisplayName("Update Unsuccessfully - NonExistent In List")
+    void updateAddress_unsuccessful_case01() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "zipCode": "08500000",
+                        "number": "House Number",
+                        "street": "Street Name",
+                        "neighborhood": "Neighborhood Name",
+                        "city": "City Name",
+                        "state": "State Name"
+                    }
+                """;
+        addressRepository.save(new Address("08500000", "Street Name",
+                "House Number", "Neighborhood Name",
+                "City Name", "State Name", admin));
+        mvc.perform(MockMvcRequestBuilders
+                        .put("/adresses")
+                        .header("Authorization", "Bearer " + authnService.generateToken(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    @DisplayName("Update Unsuccessfully - NonExistent In List")
+    void updateAddress_unsuccessful_case02() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "zipCode": "08500000",
+                        "number": "House Number",
+                        "street": "Street Name",
+                        "neighborhood": "Neighborhood Name",
+                        "city": "City Name",
+                        "state": "State Name"
+                    }
+                """;
+        mvc.perform(MockMvcRequestBuilders
+                .put("/adresses")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
                 .andExpect(status().isNotFound());
     }
 }

@@ -1,7 +1,7 @@
 package com.ecommerce.api.controller;
 
 import com.ecommerce.api.model.dto.address.AddressRequestDTO;
-import com.ecommerce.api.model.dto.address.AddressResponseDTO;
+import com.ecommerce.api.model.dto.address.AddressDTO;
 import com.ecommerce.api.service.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class AddressController {
         return ResponseEntity.ok("Saved");
     }
     @GetMapping("/me")
-    public ResponseEntity<Set<AddressResponseDTO>> getUserAdresses() {
+    public ResponseEntity<Set<AddressDTO>> getUserAdresses() {
         var addressResponseDTOList = addressService.getUserAdresses();
         return ResponseEntity.ok(addressResponseDTOList);
     }
@@ -30,5 +30,10 @@ public class AddressController {
     public ResponseEntity<String> deleteAddress(@PathVariable @Valid Long id) {
         addressService.deleteAddress(id);
         return ResponseEntity.ok("Deleted");
+    }
+    @PutMapping
+    public ResponseEntity<String> updateAddress(@RequestBody @Valid AddressDTO data) {
+        addressService.updateAddress(data);
+        return ResponseEntity.ok("Updated");
     }
 }

@@ -1,12 +1,12 @@
 package com.ecommerce.api.configuration;
 
+import com.ecommerce.api.exception.NullUserException;
 import com.ecommerce.api.repository.UserRepository;
 import com.ecommerce.api.service.AuthnService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,16 +17,21 @@ import java.io.IOException;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private AuthnService authnService;
+    private final UserRepository userRepository;
+    private final AuthnService authnService;
+
+    public SecurityFilter(UserRepository userRepository, AuthnService authnService) {
+        this.userRepository = userRepository;
+        this.authnService = authnService;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var token = recoverToken(request);
-        if(token != null) {
+        if (token != null) {
             String username = authnService.validateToken(token);
             UserDetails user = userRepository.findByUsername(username);
+            if (user == null) throw new NullUserException("User login not found!");
 
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);

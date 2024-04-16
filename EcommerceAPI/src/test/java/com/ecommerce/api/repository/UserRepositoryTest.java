@@ -1,7 +1,6 @@
 package com.ecommerce.api.repository;
 
 import com.ecommerce.api.model.User;
-import com.ecommerce.api.model.dto.user.RegistrationDTO;
 import com.ecommerce.api.model.enums.Role;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
@@ -24,29 +23,18 @@ class UserRepositoryTest {
     @Test
     @DisplayName("Load User Successfully")
     void loadByUsername_successful() {
-        var data = new RegistrationDTO(
-                "Admin",
-                "admin",
-                "24512127801",
-                "admin@gmail.com",
-                "1234");
-        this.register(data);
-        Optional<User> optionalUser = this.userRepository.loadByUsername(data.username());
+        var user = new User("User", "user",
+                        "17719960807", "user@gmail.com",
+                        "1234", Role.USER);
+        entityManager.persist(user);
+        Optional<User> optionalUser = this.userRepository.loadByUsername(user.getUsername());
         Assertions.assertTrue(optionalUser.isPresent());
-        Assertions.assertEquals(data.username(), optionalUser.get().getUsername());
+        Assertions.assertEquals(user.getUsername(), optionalUser.get().getUsername());
     }
     @Test
     @DisplayName("Load User Unsuccessfully")
     void loadByUsername_unsuccessful() {
         Optional<User> optionalUser = this.userRepository.loadByUsername("admin");
         Assertions.assertTrue(optionalUser.isEmpty());
-    }
-
-    private void register(RegistrationDTO data) {
-        var user = new User(
-                data.name(), data.username(),
-                data.CPF(), data.email(),
-                data.password(), Role.ADMIN);
-        entityManager.persist(user);
     }
 }

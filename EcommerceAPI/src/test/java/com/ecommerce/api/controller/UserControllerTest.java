@@ -285,4 +285,41 @@ class UserControllerTest {
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @DisplayName("Update Successfully")
+    void updateUser_successful() throws Exception {
+        String requestBody = """
+                    {
+                        "name": "New Name",
+                        "username": "New Username",
+                        "email": "New Email",
+                        "password": "New Password"
+                    }
+                """;
+        mvc.perform(MockMvcRequestBuilders
+                .put("/users")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isOk());
+    }
+    @Test
+    @DisplayName("Update Unsuccessfully")
+    void updateUser_unsuccessful() throws Exception {
+        String requestBody = """
+                    {
+                        "name": "New Name",
+                        "username": "New Username",
+                        "email": "admin@gmail.com",
+                        "password": "New Password"
+                    }
+                """;
+        mvc.perform(MockMvcRequestBuilders
+                .put("/users")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isInternalServerError());
+    }
 }

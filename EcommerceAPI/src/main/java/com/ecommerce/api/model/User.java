@@ -1,6 +1,6 @@
 package com.ecommerce.api.model;
 
-import com.ecommerce.api.model.dto.user.UserResponseDTO;
+import com.ecommerce.api.model.dto.user.UserDTO;
 import com.ecommerce.api.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -56,7 +56,7 @@ public class User implements UserDetails {
         this.password = password;
         this.role = role;
     }
-    public User(UserResponseDTO data) {
+    public User(UserDTO data) {
         this.id = data.id();
         this.name = data.name();
         this.username = data.username();

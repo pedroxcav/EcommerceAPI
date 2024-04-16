@@ -84,8 +84,25 @@ class ProductControllerTest {
                 .andExpect(status().isOk());
     }
     @Test
+    @DisplayName("Register Unsuccessfully - Invalid Price")
+    void newProduct_unsuccessful_case01() throws Exception {
+        String requestBody = """
+                    {
+                        "name": "Iphone",
+                        "description": "Apple smartphone.",
+                        "price": -5000
+                    }
+                """;
+        mvc.perform(MockMvcRequestBuilders
+                        .post("/products")
+                        .header("Authorization", "Bearer " + authnService.generateToken(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+    }
+    @Test
     @DisplayName("Register Unsuccessfully")
-    void newProduct_unsuccessful() throws Exception {
+    void newProduct_unsuccessful_case02() throws Exception {
         String requestBody = """
                     {
                         "name": "Iphone",
@@ -251,5 +268,78 @@ class ProductControllerTest {
                 .get("/products/me")
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Update Successfully")
+    void updateProduct_successful() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "description": "New Description Here",
+                        "price": 2500
+                    }
+                """;
+        productRepository.save(new Product("Iphone", "Smartphone apple.", 5000D));
+        mvc.perform(MockMvcRequestBuilders
+                        .put("/products")
+                        .header("Authorization", "Bearer " + authnService.generateToken(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk());
+    }
+    @Test
+    @DisplayName("Update Unsuccessfully - NonExistent")
+    void updateProduct_unsuccessful_case01() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "description": "New Description Here",
+                        "price": 2500
+                    }
+                """;
+        mvc.perform(MockMvcRequestBuilders
+                .put("/products")
+                .header("Authorization", "Bearer " + authnService.generateToken(admin))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isNotFound());
+
+    }
+    @Test
+    @DisplayName("Update Unsuccessfully - Invalid Price")
+    void updateProduct_unsuccessful_case02() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "description": "New Description Here",
+                        "price": -2500
+                    }
+                """;
+        mvc.perform(MockMvcRequestBuilders
+                .put("/products")
+                .header("Authorization", "Bearer " + authnService.generateToken(admin))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+    }
+    @Test
+    @DisplayName("Update Unsuccessfully")
+    void updateProduct_unsuccessful_case03() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "description": "New Description Here",
+                        "price": 2500
+                    }
+                """;
+        productRepository.save(new Product("Iphone", "Smartphone apple.", 5000D));
+        mvc.perform(MockMvcRequestBuilders
+                .put("/products")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isForbidden());
     }
 }

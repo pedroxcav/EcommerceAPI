@@ -4,7 +4,7 @@ import com.ecommerce.api.exception.NullAddressException;
 import com.ecommerce.api.model.Address;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.address.AddressRequestDTO;
-import com.ecommerce.api.model.dto.address.AddressResponseDTO;
+import com.ecommerce.api.model.dto.address.AddressDTO;
 import com.ecommerce.api.repository.AddressRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +15,15 @@ import java.util.stream.Collectors;
 @Service
 public class AddressService {
     private final AddressRepository addressRepository;
-    private final UserService userService;
+    private final AuthnService authnService;
 
-    public AddressService(AddressRepository addressRepository, UserService userService) {
+    public AddressService(AddressRepository addressRepository, AuthnService authnService) {
         this.addressRepository = addressRepository;
-        this.userService = userService;
+        this.authnService = authnService;
     }
 
     public void newAddress(AddressRequestDTO data) {
-        Optional<User> optionalUser = userService.getAuthnUser();
+        Optional<User> optionalUser = authnService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             Address address = new Address(
                     data.zipCode(),
@@ -37,12 +37,12 @@ public class AddressService {
             addressRepository.save(address);
         });
     }
-    public Set<AddressResponseDTO> getUserAdresses() {
-        Optional<User> optionalUser = userService.getAuthnUser();
+    public Set<AddressDTO> getUserAdresses() {
+        Optional<User> optionalUser = authnService.getAuthnUser();
         if(optionalUser.isPresent()){
             User user = optionalUser.get();
             return user.getActiveAdresses().stream()
-                    .map(address -> new AddressResponseDTO(
+                    .map(address -> new AddressDTO(
                             address.getId(),
                             address.getZipCode(),
                             address.getNumber(),
@@ -55,7 +55,7 @@ public class AddressService {
             return null;
     }
     public void deleteAddress(Long id) {
-        Optional<User> optionalUser = userService.getAuthnUser();
+        Optional<User> optionalUser = authnService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             Optional<Address> optionalAddress = addressRepository.findById(id);
             if(optionalAddress.isPresent() && optionalAddress.get().isActive()) {
@@ -67,6 +67,26 @@ public class AddressService {
                         addressRepository.save(address);
                     } else
                         addressRepository.delete(address);
+                } else
+                    throw new NullAddressException("The address doesn't exist in your list!");
+            } else
+                throw new NullAddressException();
+        });
+    }
+    public void updateAddress(AddressDTO data) {
+        Optional<User> optionalUser = authnService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            Optional<Address> optionalAddress = addressRepository.findById(data.id());
+            if (optionalAddress.isPresent()){
+                Address address = optionalAddress.get();
+                if (user.getAdresses().contains(address)) {
+                    address.setZipCode(data.zipCode());
+                    address.setNumber(data.number());
+                    address.setStreet(data.street());
+                    address.setNeighborhood(data.neighborhood());
+                    address.setCity(data.city());
+                    address.setState(data.state());
+                    addressRepository.save(address);
                 } else
                     throw new NullAddressException("The address doesn't exist in your list!");
             } else

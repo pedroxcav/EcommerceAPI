@@ -4,7 +4,7 @@ import com.ecommerce.api.exception.NullAddressException;
 import com.ecommerce.api.exception.NullOrderException;
 import com.ecommerce.api.model.*;
 import com.ecommerce.api.model.dto.purchase.PurchaseRequestDTO;
-import com.ecommerce.api.model.dto.purchase.PurchaseResponseDTO;
+import com.ecommerce.api.model.dto.purchase.PurchaseDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.AddressRepository;
 import com.ecommerce.api.repository.OrderRepository;
@@ -29,7 +29,7 @@ class PurchaseServiceTest {
     @Mock
     private AddressRepository addressRepository;
     @Mock
-    private UserService userService;
+    private AuthnService authnService;
     @InjectMocks
     private PurchaseService purchaseService;
 
@@ -61,7 +61,7 @@ class PurchaseServiceTest {
         user.setCart(List.of(order));
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
         when(addressRepository.findById(address.getId())).thenReturn(Optional.of(address));
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         var data = new PurchaseRequestDTO(Set.of(1L), address.getId());
@@ -70,7 +70,7 @@ class PurchaseServiceTest {
         verify(purchaseRepository, times(1)).save(any(Purchase.class));
         verify(addressRepository, times(1)).findById(data.addressId());
         verify(orderRepository, times(1)).findById(order.getId());
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
     }
     @Test
     @DisplayName("Unsuccessfully - Address NonExistent")
@@ -81,12 +81,12 @@ class PurchaseServiceTest {
         address.setPurchases(new HashSet<>());
 
         var data = new PurchaseRequestDTO(Set.of(1L), address.getId());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(mock(User.class)));
         when(addressRepository.findById(data.addressId())).thenReturn(Optional.empty());
 
         Assertions.assertThrows(NullAddressException.class, () -> purchaseService.buyOrders(data));
         verify(addressRepository, times(1)).findById(data.addressId());
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
         verify(purchaseRepository, never()).save(any(Purchase.class));
         verify(orderRepository, never()).findById(any());
     }
@@ -105,7 +105,7 @@ class PurchaseServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(new ArrayList<>());
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
         var data = new PurchaseRequestDTO(Set.of(1L), address.getId());
         when(addressRepository.findById(data.addressId())).thenReturn(Optional.of(address));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -113,7 +113,7 @@ class PurchaseServiceTest {
         Assertions.assertThrows(NullOrderException.class, () -> purchaseService.buyOrders(data));
         verify(addressRepository, times(1)).findById(data.addressId());
         verify(orderRepository, times(1)).findById(any());
-        verify(userService, times(1)).getAuthnUser();
+        verify(authnService, times(1)).getAuthnUser();
         verify(purchaseRepository, never()).save(any(Purchase.class));
     }
 
@@ -136,11 +136,11 @@ class PurchaseServiceTest {
         user.setCart(new ArrayList<>());
         user.setWishlist(new HashSet<>());
         user.setPurchases(List.of(firstPurchase, secondPurchase));
-        when(userService.getAuthnUser()).thenReturn(Optional.of(user));
+        when(authnService.getAuthnUser()).thenReturn(Optional.of(user));
 
-        Set<PurchaseResponseDTO> purchaseResponseDTOSet = purchaseService.getUserPurchases();
-        Assertions.assertEquals(user.getPurchases().size(), purchaseResponseDTOSet.size());
-        verify(userService, times(1)).getAuthnUser();
+        Set<PurchaseDTO> purchaseDTOSet = purchaseService.getUserPurchases();
+        Assertions.assertEquals(user.getPurchases().size(), purchaseDTOSet.size());
+        verify(authnService, times(1)).getAuthnUser();
     }
 
     @Test
@@ -157,9 +157,9 @@ class PurchaseServiceTest {
         List<Purchase> purchases = List.of(firstPurchase, secondPurchase);
         when(purchaseRepository.findAll()).thenReturn(purchases);
 
-        Set<PurchaseResponseDTO> purchaseResponseDTOSet = purchaseService.getAllPurchases();
+        Set<PurchaseDTO> purchaseDTOSet = purchaseService.getAllPurchases();
 
-        Assertions.assertEquals(purchases.size(), purchaseResponseDTOSet.size());
+        Assertions.assertEquals(purchases.size(), purchaseDTOSet.size());
         verify(purchaseRepository, times(1)).findAll();
     }
 }

@@ -6,7 +6,8 @@ import com.ecommerce.api.exception.UserRegisteredException;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.user.AuthenticationDTO;
 import com.ecommerce.api.model.dto.user.RegistrationDTO;
-import com.ecommerce.api.model.dto.user.UserResponseDTO;
+import com.ecommerce.api.model.dto.user.UpdateDTO;
+import com.ecommerce.api.model.dto.user.UserDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.repository.AddressRepository;
 import com.ecommerce.api.repository.OrderRepository;
@@ -14,8 +15,6 @@ import com.ecommerce.api.repository.UserRepository;
 import com.ecommerce.api.service.component.Validator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,29 +25,29 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
     private final Validator validator;
+    private final PasswordEncoder encoder;
     private final AuthnService authnService;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
-    private final PasswordEncoder passwordEncoder;
     private final AddressRepository addressRepository;
     private final AuthenticationManager authenticationManager;
 
-    public UserService(AuthnService authnService, UserRepository userRepository, OrderRepository orderRepository, PasswordEncoder passwordEncoder, AddressRepository addressRepository, AuthenticationManager authenticationManager, Validator validator) {
+    public UserService(AuthnService authnService, UserRepository userRepository, OrderRepository orderRepository, PasswordEncoder encoder, AddressRepository addressRepository, AuthenticationManager authenticationManager, Validator validator) {
+        this.encoder = encoder;
+        this.validator = validator;
         this.authnService = authnService;
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
-        this.passwordEncoder = passwordEncoder;
         this.addressRepository = addressRepository;
         this.authenticationManager = authenticationManager;
-        this.validator = validator;
     }
 
     public void register(RegistrationDTO data, Role role) {
         if (!validator.validate(data.CPF()))
             throw new InvalidCPFException();
-        else if(userRepository.existsByUsernameOrCPF(data.username(), data.CPF()))
+        else if(userRepository.existsByUsernameOrCPFOrEmail(data.username(), data.CPF(), data.email()))
             throw new UserRegisteredException();
-        var encoded = passwordEncoder.encode(data.password());
+        var encoded = encoder.encode(data.password());
         userRepository.save(
                 new User(data.name(), data.username(), data.CPF(), data.email(), encoded, role));
     }
@@ -57,10 +56,10 @@ public class UserService {
         var authentication = authenticationManager.authenticate(usernamePassword);
         return authnService.generateToken((User) authentication.getPrincipal());
     }
-    public List<UserResponseDTO> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         List<User> userList = userRepository.findAll();
         return userList.stream()
-                .map(user -> new UserResponseDTO(
+                .map(user -> new UserDTO(
                         user.getId(),
                         user.getName(),
                         user.getUsername(),
@@ -74,15 +73,6 @@ public class UserService {
                         user.getWishlist(),
                         user.getPurchases()))
                 .collect(Collectors.toList());
-    }
-    public Optional<User> getAuthnUser() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-        if(principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
-            return userRepository.loadByUsername(username);
-        } else
-            throw new NullUserException();
     }
     public void deleteUser(String username) {
         User user = (User) userRepository.findByUsername(username);
@@ -103,5 +93,18 @@ public class UserService {
             userRepository.delete(user);
         } else
             throw new NullUserException();
+    }
+    public void updateUser(UpdateDTO data) {
+        Optional<User> optionalUser = authnService.getAuthnUser();
+        optionalUser.ifPresent(user -> {
+            var usedDataList = userRepository.findAllByUsernameOrEmail(data.username(), data.email());
+            if (usedDataList.stream().anyMatch(userValue -> !userValue.getId().equals(user.getId())))
+                throw new UserRegisteredException("Data already in use!");
+            user.setName(data.name());
+            user.setUsername(data.username());
+            user.setEmail(data.email());
+            user.setPassword(encoder.encode(data.password()));
+            userRepository.save(user);
+        });
     }
 }

@@ -63,14 +63,12 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!--
         <dependency>
-            To make sure it will work, search for ("/swagger-ui/index.html")
+            <!--To make sure it will work, search for ("/swagger-ui/index.html")-->
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.4.0</version>
         </dependency>
-        -->
     </dependencies>
 
     <build>

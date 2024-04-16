@@ -2,7 +2,8 @@ package com.ecommerce.api.controller;
 
 import com.ecommerce.api.model.dto.user.AuthenticationDTO;
 import com.ecommerce.api.model.dto.user.RegistrationDTO;
-import com.ecommerce.api.model.dto.user.UserResponseDTO;
+import com.ecommerce.api.model.dto.user.UserDTO;
+import com.ecommerce.api.model.dto.user.UpdateDTO;
 import com.ecommerce.api.model.enums.Role;
 import com.ecommerce.api.service.UserService;
 import jakarta.validation.Valid;
@@ -34,7 +35,7 @@ public class UserController {
         return ResponseEntity.ok(token);
     }
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
         var registrationDTOList = userService.getAllUsers();
         return ResponseEntity.ok(registrationDTOList);
     }
@@ -42,5 +43,11 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@PathVariable(name = "username") String username) {
         userService.deleteUser(username);
         return ResponseEntity.ok("Deleted");
+    }
+
+    @PutMapping
+    public ResponseEntity<String> updateUser(@RequestBody @Valid UpdateDTO data) {
+        userService.updateUser(data);
+        return ResponseEntity.ok("Log in again!");
     }
 }

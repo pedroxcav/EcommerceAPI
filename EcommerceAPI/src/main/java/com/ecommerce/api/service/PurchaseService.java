@@ -7,7 +7,7 @@ import com.ecommerce.api.model.Order;
 import com.ecommerce.api.model.Purchase;
 import com.ecommerce.api.model.User;
 import com.ecommerce.api.model.dto.purchase.PurchaseRequestDTO;
-import com.ecommerce.api.model.dto.purchase.PurchaseResponseDTO;
+import com.ecommerce.api.model.dto.purchase.PurchaseDTO;
 import com.ecommerce.api.repository.AddressRepository;
 import com.ecommerce.api.repository.OrderRepository;
 import com.ecommerce.api.repository.PurchaseRepository;
@@ -24,17 +24,17 @@ public class PurchaseService {
     private final PurchaseRepository purchaseRepository;
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepository;
-    private final UserService userService;
+    private final AuthnService authnService;
 
-    public PurchaseService(PurchaseRepository purchaseRepository, OrderRepository orderRepository, AddressRepository addressRepository, UserService userService) {
+    public PurchaseService(PurchaseRepository purchaseRepository, OrderRepository orderRepository, AddressRepository addressRepository, AuthnService authnService) {
         this.purchaseRepository = purchaseRepository;
         this.orderRepository = orderRepository;
         this.addressRepository = addressRepository;
-        this.userService = userService;
+        this.authnService = authnService;
     }
 
     public void buyOrders(PurchaseRequestDTO data) {
-        Optional<User> optionalUser = userService.getAuthnUser();
+        Optional<User> optionalUser = authnService.getAuthnUser();
         optionalUser.ifPresent(user -> {
             Optional<Address> optionalAddress = addressRepository.findById(data.addressId());
             if(optionalAddress.isEmpty() || !user.getActiveAdresses().contains(optionalAddress.get()))
@@ -58,12 +58,12 @@ public class PurchaseService {
             purchaseRepository.save(purchase);
         });
     }
-    public Set<PurchaseResponseDTO> getUserPurchases() {
-        Optional<User> optionalUser = userService.getAuthnUser();
+    public Set<PurchaseDTO> getUserPurchases() {
+        Optional<User> optionalUser = authnService.getAuthnUser();
         if(optionalUser.isPresent()) {
             User user = optionalUser.get();
             return user.getPurchases().stream()
-                    .map(purchase -> new PurchaseResponseDTO(
+                    .map(purchase -> new PurchaseDTO(
                             purchase.getId(),
                             purchase.getTotalPrice(),
                             purchase.getOrders(),
@@ -73,10 +73,10 @@ public class PurchaseService {
         } else
             return null;
     }
-    public Set<PurchaseResponseDTO> getAllPurchases() {
+    public Set<PurchaseDTO> getAllPurchases() {
         List<Purchase> purchasesList = purchaseRepository.findAll();
         return purchasesList.stream()
-                .map(purchase -> new PurchaseResponseDTO(
+                .map(purchase -> new PurchaseDTO(
                         purchase.getId(),
                         purchase.getTotalPrice(),
                         purchase.getOrders(),

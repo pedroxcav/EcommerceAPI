@@ -142,4 +142,90 @@ class OrderControllerTest {
                 .header("Authorization", "Bearer " + authnService.generateToken(user)))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("Updates Successfully")
+    void updateOrder_successful() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "amount": 2,
+                        "productId": 2
+                    }
+                """;
+        var firstProduct = productRepository.save(
+                new Product("Iphone", "Apple smartphone.", 5000D));
+        var secondProduct = productRepository.save(
+                new Product("Iphone", "Apple smartphone.", 5000D));
+        var order = orderRepository.save(
+                new Order(firstProduct, 5, firstProduct.getPrice() * 5, user));
+        mvc.perform(MockMvcRequestBuilders
+                .put("/orders")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isOk());
+
+        Optional<Order> optionalOrder = orderRepository.findById(order.getId());
+        optionalOrder.ifPresent(orderValue ->
+                Assertions.assertEquals(secondProduct.getId(), orderValue.getProduct().getId()));
+    }
+    @Test
+    @DisplayName("Updates Unsuccessfully - NonExistent Product")
+    void updateOrder_unsuccessful_case01() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "amount": 2,
+                        "productId": 2
+                    }
+                """;
+        var firstProduct = productRepository.save(
+                new Product("Iphone", "Apple smartphone.", 5000D));
+        orderRepository.save(new Order(firstProduct, 5, firstProduct.getPrice() * 5, user));
+        mvc.perform(MockMvcRequestBuilders
+                .put("/orders")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    @DisplayName("Updates Unsuccessfully - NonExistent Order")
+    void updateOrder_unsuccessful_case02() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "amount": 2,
+                        "productId": 2
+                    }
+                """;
+        mvc.perform(MockMvcRequestBuilders
+                .put("/orders")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    @DisplayName("Updates Unsuccessfully - Invalid Amount")
+    void updateOrder_unsuccessful_case03() throws Exception {
+        String requestBody = """
+                    {
+                        "id": 1,
+                        "amount": -2,
+                        "productId": 2
+                    }
+                """;
+        var product = productRepository.save(
+                new Product("Iphone", "Apple smartphone.", 5000D));
+        productRepository.save(new Product("Iphone", "Apple smartphone.", 5000D));
+        orderRepository.save(new Order(product, 5, product.getPrice() * 5, user));
+        mvc.perform(MockMvcRequestBuilders
+                .put("/orders")
+                .header("Authorization", "Bearer " + authnService.generateToken(user))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+                .andExpect(status().isBadRequest());
+    }
 }
