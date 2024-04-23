@@ -3,15 +3,17 @@ package com.ecommerce.api.controller;
 import com.ecommerce.api.model.dto.number.NumberDTO;
 import com.ecommerce.api.service.NumberService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/numbers")
 public class NumberController {
-    @Autowired
-    private NumberService numberService;
+    private final NumberService numberService;
+
+    public NumberController(NumberService numberService) {
+        this.numberService = numberService;
+    }
 
     @PostMapping
     public ResponseEntity<String> newNumber(@RequestBody @Valid NumberDTO data) {

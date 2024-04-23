@@ -12,14 +12,19 @@
 - MySQL Database
 - Lombok
 
-### Configuration 🛠️
+### Arrangement 🛠️
+#### Download
 Before you start, you need to do these steps:
 - Versioning Software [Downlaod GIT](https://git-scm.com/downloads)
 - Java Language [Download Java SDK](https://www.oracle.com/br/java/technologies/downloads/)
 - MySQL Database [Download MySQL](https://dev.mysql.com/downloads/)
 - Code Editor IDE [Download Intelij](https://www.jetbrains.com/idea/download/?section=windows)
 - Dependency Manager [Download Maven](https://maven.apache.org/download.cgi)
-- Set maven as a environment variable.
+#### Configuration
+Then, set the following details:
+- Database at 'application.properties'
+- Maven as a system enviroment variable
+- Set GIT as enviroment variable too
 
 After it, open command prompt and do this:
 ```bash

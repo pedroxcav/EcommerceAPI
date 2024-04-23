@@ -4,7 +4,6 @@ import com.ecommerce.api.model.dto.purchase.PurchaseRequestDTO;
 import com.ecommerce.api.model.dto.purchase.PurchaseDTO;
 import com.ecommerce.api.service.PurchaseService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +12,11 @@ import java.util.Set;
 @RestController
 @RequestMapping("/purchases")
 public class PurchaseController {
-    @Autowired
-    private PurchaseService purchaseService;
+    private final PurchaseService purchaseService;
+
+    public PurchaseController(PurchaseService purchaseService) {
+        this.purchaseService = purchaseService;
+    }
 
     @PostMapping
     public ResponseEntity<String> buyOrders(@RequestBody @Valid PurchaseRequestDTO data) {

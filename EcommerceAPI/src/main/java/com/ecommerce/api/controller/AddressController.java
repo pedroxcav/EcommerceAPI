@@ -13,8 +13,11 @@ import java.util.Set;
 @RestController
 @RequestMapping("/adresses")
 public class AddressController {
-    @Autowired
-    private AddressService addressService;
+    private final AddressService addressService;
+
+    public AddressController(AddressService addressService) {
+        this.addressService = addressService;
+    }
 
     @PostMapping
     public ResponseEntity<String> newAddress(@RequestBody @Valid AddressRequestDTO data) {

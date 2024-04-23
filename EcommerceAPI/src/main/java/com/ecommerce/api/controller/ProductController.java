@@ -5,7 +5,6 @@ import com.ecommerce.api.model.dto.product.ProductDTO;
 import com.ecommerce.api.model.dto.product.ProductUpdateDTO;
 import com.ecommerce.api.service.ProductService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +14,11 @@ import java.util.Set;
 @RestController
 @RequestMapping("/products")
 public class ProductController {
-    @Autowired
-    private ProductService productService;
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     @PostMapping
     public ResponseEntity<String> newProduct(@RequestBody @Valid ProductRequestDTO data) {

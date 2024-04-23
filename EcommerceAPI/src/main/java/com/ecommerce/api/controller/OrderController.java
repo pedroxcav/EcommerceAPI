@@ -5,7 +5,6 @@ import com.ecommerce.api.model.dto.order.OrderDTO;
 import com.ecommerce.api.model.dto.order.OrderUpdateDTO;
 import com.ecommerce.api.service.OrderService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,8 +13,11 @@ import java.util.Set;
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @PostMapping
     public ResponseEntity<String> addToCart(@RequestBody @Valid OrderRequestDTO data) {
