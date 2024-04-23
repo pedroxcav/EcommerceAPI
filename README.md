@@ -163,7 +163,7 @@ Postman Collection [Download](https://drive.google.com/file/d/1vyjVJ47zzkK-1Zg9N
 <details>
   <summary>ER Diagram</summary>
   <br>
-  <img width=500px src="media/ER_Diagram.jpeg">
+  <img width=500px src="media/Entity_Diagram.jpeg">
   
 </details>
 <details>
