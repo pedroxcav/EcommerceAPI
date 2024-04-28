@@ -1,5 +1,6 @@
 package com.ecommerce.api.controller;
 
+import com.ecommerce.api.exception.NullUserException;
 import com.ecommerce.api.model.*;
 import com.ecommerce.api.model.Number;
 import com.ecommerce.api.model.enums.Role;
@@ -58,10 +59,8 @@ class UserControllerTest {
                 "User", "user",
                 "17719960807", "user@gmail.com",
                 encoder.encode("1234"), Role.USER));
-        admin = userRepository.save(new User(
-                "Admin", "admin",
-                "24512127801", "admin@gmail.com",
-                encoder.encode("1234"), Role.ADMIN));
+        admin = userRepository.loadByUsername("admin")
+                .orElseThrow(NullUserException::new);
         mvc = MockMvcBuilders.webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
