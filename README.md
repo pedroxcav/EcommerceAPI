@@ -1,6 +1,6 @@
 ## Ecommerce RestAPI
 <p align = "justify">
-  This API was developed to manage a ecommerce system, turning the connection between different layers of the application easier. The API goals are enable users to favorite their products, create orders and buy whatever they want to, also they can change their cellphone numbers and shipping adresses! Futhermore, admins can manage users, products and more at the system. Everything with security and guarantee tests.
+  This API was developed to manage an ecommerce system, turning the connection between different layers of the application easier. The API goals are enable users to favorite their products, create orders and buy whatever they want to, also they can change their cellphone numbers and shipping adresses! Furthermore, admins can manage users, products and more at the system. Everything with security and guarantee tests.
 </p>
 
 ### Technologies 📌
